@@ -1,0 +1,83 @@
+/* Paged document surface and ProseMirror content, mapped onto the design's .q-page / .q-d-* rules. */
+
+.q-doc {
+  position: relative;
+  flex: none;
+  width: var(--page-w);
+  /* Chromium's standardised `zoom` scales layout, so scrolling and hit-testing stay correct. */
+  zoom: var(--zoom, 1);
+}
+.q-sheets { position: absolute; inset: 0; pointer-events: none; }
+.q-page-sheet {
+  position: absolute; left: 0; width: var(--page-w); height: var(--page-h);
+  background: var(--q-bg-page); box-shadow: var(--q-shadow-page);
+}
+.q-page-num { position: absolute; right: 0; bottom: -18px; font: var(--q-type-caption); color: var(--q-text-tertiary); }
+
+.q-editor {
+  position: relative;
+  padding: var(--margin-top) var(--margin-right) var(--margin-bottom) var(--margin-left);
+  min-height: var(--page-h);
+}
+
+/* Spacer decorations push blocks that would straddle a page boundary onto the next page. */
+.q-spacer { display: block; height: 0; pointer-events: none; }
+
+.ProseMirror {
+  outline: none;
+  color: var(--q-doc-text);
+  font: var(--q-doc-type-body);
+  width: var(--text-w);
+  min-height: var(--text-h);
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  caret-color: var(--q-accent);
+  user-select: text;
+  -webkit-user-select: text;
+}
+.ProseMirror ::selection { background: var(--q-doc-selection); }
+.ProseMirror p { margin: 0 0 10px; }
+.ProseMirror p.is-editor-empty:first-child::before { content: attr(data-placeholder); color: var(--q-text-tertiary); float: left; height: 0; pointer-events: none; }
+.ProseMirror h1.q-title { font: var(--q-doc-type-title); letter-spacing: -0.01em; margin: 0 0 6px; }
+.ProseMirror h1 { font: var(--q-doc-type-h1); margin: 26px 0 8px; }
+.ProseMirror h2 { font: var(--q-doc-type-h2); margin: 20px 0 6px; }
+.ProseMirror h3 { font: var(--q-doc-type-h3); margin: 16px 0 4px; }
+.ProseMirror > :first-child { margin-top: 0; }
+.ProseMirror ul, .ProseMirror ol { margin: 0 0 12px; padding-left: 26px; }
+.ProseMirror li { margin-bottom: 3px; padding-left: 2px; }
+.ProseMirror li > p { margin-bottom: 0; }
+.ProseMirror ul ul, .ProseMirror ol ol, .ProseMirror ul ol, .ProseMirror ol ul { margin: 3px 0 0; }
+.ProseMirror ul { list-style: disc; }
+.ProseMirror ul ul { list-style: circle; }
+.ProseMirror ul ul ul { list-style: square; }
+.ProseMirror ol { list-style: decimal; }
+.ProseMirror ol ol { list-style: lower-alpha; }
+.ProseMirror ol ol ol { list-style: lower-roman; }
+.ProseMirror blockquote { font: var(--q-doc-type-quote); color: var(--q-doc-text-secondary); margin: 14px 0 14px 4px; padding-left: 18px; border-left: 2px solid var(--q-doc-rule); }
+.ProseMirror blockquote p { margin-bottom: 6px; }
+.ProseMirror mark { background: var(--q-doc-highlight); color: inherit; border-radius: 2px; padding: 0 1px; }
+.ProseMirror a { color: var(--q-doc-link); text-decoration: underline; text-underline-offset: 2px; cursor: text; }
+.ProseMirror code { font: 0.92em var(--q-font-mono); background: var(--q-fill-subtle); border-radius: 3px; padding: 0 3px; }
+.ProseMirror hr { border: 0; border-top: 1px solid var(--q-doc-rule); margin: 14px 0; }
+.ProseMirror hr.page-break {
+  border: 0; margin: 10px 0; height: 14px; position: relative;
+  background: repeating-linear-gradient(to right, var(--q-text-tertiary) 0 6px, transparent 6px 12px) center / 100% 1px no-repeat;
+}
+.ProseMirror hr.page-break::after { content: "Page break"; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); padding: 0 8px; background: var(--q-bg-page); font: var(--q-type-caption); color: var(--q-text-tertiary); }
+.ProseMirror hr.ProseMirror-selectednode, .ProseMirror img.ProseMirror-selectednode { outline: 2px solid var(--q-accent); outline-offset: 2px; border-radius: 2px; }
+.ProseMirror img { max-width: 100%; height: auto; display: block; margin: 8px 0 12px; }
+.ProseMirror [data-align="center"] img { margin-left: auto; margin-right: auto; }
+
+/* Tables */
+.ProseMirror .tableWrapper { margin: 16px 0; overflow-x: visible; }
+.ProseMirror table { border-collapse: collapse; table-layout: fixed; width: 100%; font: var(--q-doc-type-table); margin: 0; }
+.ProseMirror th, .ProseMirror td { border: 1px solid var(--q-doc-table-border); padding: 6px 9px; text-align: left; vertical-align: top; position: relative; min-width: 40px; }
+.ProseMirror th { background: var(--q-doc-table-head); font-weight: 600; }
+.ProseMirror td p, .ProseMirror th p { margin: 0; }
+.ProseMirror .selectedCell::after { content: ""; position: absolute; inset: 0; background: var(--q-doc-selection); pointer-events: none; z-index: 2; }
+.ProseMirror .column-resize-handle { position: absolute; right: -2px; top: 0; bottom: 0; width: 4px; background: var(--q-accent); pointer-events: none; z-index: 3; }
+.ProseMirror.resize-cursor { cursor: col-resize; }
+.ProseMirror table.is-active-table { outline: 2px solid var(--q-accent); outline-offset: -1px; }
+
+/* Gapcursor */
+.ProseMirror-gapcursor::after { border-top: 1px solid var(--q-doc-text); }

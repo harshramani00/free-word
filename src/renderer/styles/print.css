@@ -1,0 +1,25 @@
+/* PDF export: printToPDF renders with print media. Hide every piece of app chrome and let the
+   document flow so Chromium paginates at the paper size and margins the export sheet chose. */
+@media print {
+  html, body, #root, .q-app, .q-work, .q-main, .q-canvas, .q-canvas-inner, .q-doc, .q-editor {
+    height: auto !important; min-height: 0 !important; width: auto !important; max-width: none !important;
+    overflow: visible !important; display: block !important; padding: 0 !important; margin: 0 !important;
+    background: #fff !important; box-shadow: none !important; zoom: 1 !important; transform: none !important;
+  }
+  body { color: #000 !important; }
+  .q-titlebar, .q-tabs, .q-ribbon, .q-formatbar, .q-nav, .q-ruler, .q-status, .q-sheets, .q-scrim, .q-sheet, .q-pop, .q-ctx, .q-spacer, .q-page-num {
+    display: none !important;
+  }
+  .ProseMirror { width: auto !important; min-height: 0 !important; color: #000 !important; }
+  .ProseMirror a { color: #1F5FD6; }
+  .ProseMirror hr.page-break { break-after: page; page-break-after: always; height: 0; margin: 0; background: none; }
+  .ProseMirror hr.page-break::after { content: none; }
+  .ProseMirror h1, .ProseMirror h2, .ProseMirror h3 { break-after: avoid; }
+  .ProseMirror tr { break-inside: avoid; }
+  .ProseMirror img { break-inside: avoid; }
+  .ProseMirror .selectedCell::after { display: none; }
+  .ProseMirror table.is-active-table { outline: none; }
+  .ProseMirror th { background: #F4F4F6 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ProseMirror mark { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .ProseMirror p.is-editor-empty:first-child::before { content: none; }
+}

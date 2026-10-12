@@ -1,0 +1,39 @@
+appId: com.harshramani.quill
+productName: Quill
+copyright: Copyright © 2026 Harsh Ramani
+directories:
+  buildResources: build
+  output: release
+files:
+  - out/**
+  - package.json
+  - "!**/*.map"
+asar: true
+npmRebuild: false
+mac:
+  category: public.app-category.productivity
+  target:
+    - target: dmg
+      arch: [arm64]
+  hardenedRuntime: true
+  gatekeeperAssess: false
+  entitlements: build/entitlements.mac.plist
+  entitlementsInherit: build/entitlements.mac.plist
+  darkModeSupport: true
+  extendInfo:
+    CFBundleDocumentTypes:
+      - CFBundleTypeName: Word Document
+        CFBundleTypeRole: Editor
+        LSHandlerRank: Alternate
+        LSItemContentTypes:
+          - org.openxmlformats.wordprocessingml.document
+        CFBundleTypeExtensions: [docx]
+dmg:
+  artifactName: ${productName}-${version}-${arch}.${ext}
+  contents:
+    - x: 140
+      y: 180
+    - x: 400
+      y: 180
+      type: link
+      path: /Applications

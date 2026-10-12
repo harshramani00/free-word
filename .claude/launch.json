@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "quill-renderer",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": ["electron-vite", "dev", "--", "--remote-debugging-port=9222"],
+      "port": 5173
+    }
+  ]
+}

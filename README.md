@@ -58,7 +58,7 @@ electron-builder signs the app with whatever Apple Development identity is in yo
 
 ## How documents map to .docx
 
-Paragraph styles map to Word's built-in style ids (`Title`, `Heading1`–`Heading3`, `Quote`), so Word's navigation pane and table of contents work. Lists use real numbering definitions (bullets cycle • ◦ ▪, numbers cycle 1. a. i.), each top-level numbered list restarts at 1. Tables carry a repeating header row, merged cells (`gridSpan` / `vMerge`) and column widths. Images are embedded as media parts. Links are external hyperlinks with the `Hyperlink` character style. Page size and margins are written to the section properties and read back on open.
+Inline formatting covers bold, italic, underline, strikethrough, subscript, superscript, font family, font size, text colour and highlight. Paragraph styles map to Word's built-in style ids (`Title`, `Heading1`–`Heading3`, `Quote`), so Word's navigation pane and table of contents work. Lists use real numbering definitions (bullets cycle • ◦ ▪, numbers cycle 1. a. i.), each top-level numbered list restarts at 1. Tables carry a repeating header row, merged cells (`gridSpan` / `vMerge`) and column widths. Images are embedded as media parts. Links are external hyperlinks with the `Hyperlink` character style. Page size and margins are written to the section properties and read back on open.
 
 On import, mammoth converts the structure. Because mammoth's document model has no text colour, a pre-pass tags coloured or shaded runs with synthetic character styles and records picture sizes, and a generated style map carries alignment, indentation, font family, font size and highlight through to the HTML, which the renderer parses with the editor schema.
 

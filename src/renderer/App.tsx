@@ -201,11 +201,11 @@ function EditorHost(): ReactNode {
       content: pendingContent ?? EMPTY_DOC,
       autofocus: 'start',
       editorProps: { attributes: { class: 'ProseMirror', spellcheck: 'true', role: 'textbox', 'aria-multiline': 'true', 'aria-label': 'Document' } },
-      onCreate: ({ editor: e }) => {
-        editorRef.current = e
-        markSaved(e)
-      },
-      onUpdate: ({ editor: e }) => syncDirty(e)
+      // The live instance is bound in the effect below; onCreate may also fire for an instance
+      // React discards under StrictMode, so it must not touch shared state.
+      onUpdate: ({ editor: e }) => {
+        if (editorRef.current === e) syncDirty(e)
+      }
     },
     [loadToken]
   )
@@ -224,10 +224,15 @@ function EditorHost(): ReactNode {
 
   // Page setup changes: update the pagination plugin's metrics and re-layout.
   useEffect(() => {
-    const ext = editor.extensionManager.extensions.find((e) => e.name === 'pagination')
+    if (!editor || editor.isDestroyed) return
+    const ext = editor.extensionManager?.extensions.find((e) => e.name === 'pagination')
     if (ext) {
       ;(ext.options as { metrics: typeof paginationMetrics }).metrics = paginationMetrics
-      relayout(editor.view)
+      try {
+        relayout(editor.view)
+      } catch {
+        /* view not mounted yet; the plugin lays out on mount */
+      }
     }
   }, [editor, paginationMetrics])
 

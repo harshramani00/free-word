@@ -1,6 +1,8 @@
 import type { Extensions } from '@tiptap/core'
 import { Highlight } from '@tiptap/extension-highlight'
 import { Image } from '@tiptap/extension-image'
+import { Subscript } from '@tiptap/extension-subscript'
+import { Superscript } from '@tiptap/extension-superscript'
 import { TableKit } from '@tiptap/extension-table'
 import { TextStyleKit } from '@tiptap/extension-text-style'
 import { StarterKit } from '@tiptap/starter-kit'
@@ -28,6 +30,8 @@ export function schemaExtensions(): Extensions {
     QuillTextAlign,
     TextStyleKit.configure({ lineHeight: false }),
     Highlight.configure({ multicolor: true }),
+    Subscript,
+    Superscript,
     TableKit.configure({ table: { resizable: true, lastColumnResizable: true, allowTableNodeSelection: true } }),
     Image.configure({ allowBase64: true, inline: false })
   ]

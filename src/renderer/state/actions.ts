@@ -88,8 +88,12 @@ export async function exportDocument(choice: ExportChoice): Promise<void> {
   // Chromium takes the printed page geometry from an @page rule, so write one for the chosen
   // paper and margins; the main process also passes the same values to printToPDF.
   applyPrintPageRule(choice.pageSetup)
+  // Take focus out of the editor so the caret and selection are not painted into the PDF.
+  const { from, to } = editor.state.selection
+  editor.commands.blur()
   await new Promise((r) => setTimeout(r, 50))
   const result = await window.quill.exportPdf({ suggestedName: choice.fileName, pageSetup: choice.pageSetup })
+  editor.chain().focus(undefined, { scrollIntoView: false }).setTextSelection({ from, to }).run()
   if (!result.ok && 'error' in result) setState({ notice: `PDF export failed: ${result.error}` })
   else if (result.ok) setState({ notice: `Exported ${result.name}.pdf` })
 }

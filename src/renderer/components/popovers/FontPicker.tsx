@@ -4,6 +4,7 @@ import { FONTS } from '../../editor/commands'
 import type { FontOption } from '../../editor/commands'
 import { SearchField } from '../controls'
 import { Menu, MenuHead, MenuSep } from './Menu'
+import type { PopoverState } from './Menu'
 
 const RECENT_KEY = 'quill.recentFonts.v1'
 type Kind = 'all' | FontOption['kind']
@@ -42,7 +43,7 @@ function Row({ font, current, onPick }: { font: FontOption; current: boolean; on
   )
 }
 
-export function FontPicker({ current, inDocument, onPick }: { current: string; inDocument: string[]; onPick: (f: FontOption) => void }): ReactNode {
+export function FontPicker({ pop, current, inDocument, onPick }: { pop: PopoverState; current: string; inDocument: string[]; onPick: (f: FontOption) => void }): ReactNode {
   const [query, setQuery] = useState('')
   const [kind, setKind] = useState<Kind>('all')
   const recent = useMemo(() => loadRecentFonts(), [])
@@ -51,7 +52,7 @@ export function FontPicker({ current, inDocument, onPick }: { current: string; i
   const docFonts = inDocument.map(byName).filter((f): f is FontOption => !!f)
   const recentFonts = recent.map(byName).filter((f): f is FontOption => !!f)
   return (
-    <Menu role="listbox" label="Fonts" style={{ width: 304, padding: 6, maxHeight: 520, overflowY: 'auto' }}>
+    <Menu pop={pop} role="listbox" label="Fonts" style={{ width: 304, padding: 6, maxHeight: 520, overflowY: 'auto' }}>
       <SearchField value={query} onChange={setQuery} placeholder="Search fonts" style={{ width: '100%', height: 28 }} />
       <div style={{ display: 'flex', gap: 4, padding: '8px 2px 6px', flexWrap: 'wrap' }}>
         {KINDS.map((k) => (

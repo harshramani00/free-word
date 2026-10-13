@@ -40,6 +40,7 @@ export function StylePopup({ editor, state, width = 112 }: ControlProps & { widt
       </PopupBtn>
       {pop.open ? (
         <StylePicker
+          pop={pop}
           current={state.style}
           onPick={(s: ParagraphStyle) => {
             pop.setOpen(false)
@@ -61,6 +62,7 @@ export function FontFamilyPopup({ editor, state, width = 150 }: ControlProps & {
       </PopupBtn>
       {pop.open ? (
         <FontPicker
+          pop={pop}
           current={state.fontFamily}
           inDocument={state.docFonts}
           onPick={(f) => {
@@ -82,7 +84,7 @@ export function FontSizePopup({ editor, state }: ControlProps): ReactNode {
         {state.fontSize}
       </PopupBtn>
       {pop.open ? (
-        <Menu role="listbox" label="Font size" style={{ minWidth: 88, maxHeight: 360, overflowY: 'auto' }}>
+        <Menu pop={pop} role="listbox" label="Font size" style={{ minWidth: 88, maxHeight: 360, overflowY: 'auto' }}>
           {FONT_SIZES.map((s) => (
             <MenuItem
               key={s}
@@ -147,6 +149,7 @@ export function ColorButtons({ editor, state, chev }: ControlProps & { chev?: bo
         <TBtn label="Text color" icon="text-color" chev={chev} swatch={state.color ?? '#D13B2C'} pressed={textPop.open} ariaHasPopup ariaExpanded={textPop.open} onClick={textPop.toggle} />
         {textPop.open ? (
           <ColorPicker
+            pop={textPop}
             kind="text"
             value={state.color}
             onPick={(hex) => {
@@ -162,6 +165,7 @@ export function ColorButtons({ editor, state, chev }: ControlProps & { chev?: bo
         <TBtn label="Highlight color" icon="highlight-color" chev={chev} swatch={state.highlight ?? '#FFD60A'} pressed={hlPop.open} ariaHasPopup ariaExpanded={hlPop.open} onClick={hlPop.toggle} />
         {hlPop.open ? (
           <ColorPicker
+            pop={hlPop}
             kind="highlight"
             value={state.highlight}
             onPick={(hex) => {
@@ -223,6 +227,7 @@ export function TableInsertButton({ editor, big }: { editor: Editor; big?: boole
       )}
       {pop.open ? (
         <TableGridPicker
+          pop={pop}
           onPick={(r, c) => {
             pop.setOpen(false)
             insertTable(editor, r, c)
@@ -251,7 +256,7 @@ export function LinkButton({ editor, state, big }: ControlProps & { big?: boolea
       ) : (
         <TBtn label="Insert link" icon="insert-link" on={state.linkHref !== null} pressed={pop.open} ariaHasPopup ariaExpanded={pop.open} onClick={pop.toggle} />
       )}
-      {pop.open ? <LinkPopover initial={state.linkHref ?? ''} onApply={apply} onRemove={() => apply('')} onClose={() => pop.setOpen(false)} /> : null}
+      {pop.open ? <LinkPopover pop={pop} initial={state.linkHref ?? ''} onApply={apply} onRemove={() => apply('')} onClose={() => pop.setOpen(false)} /> : null}
     </Anchor>
   )
 }

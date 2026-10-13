@@ -1,4 +1,4 @@
-import { generateJSON } from '@tiptap/html'
+import { generateJSON } from '@tiptap/html/server'
 import mammoth from 'mammoth'
 import { schemaExtensions } from '../../shared/schema/extensions'
 import type { JSONContent, PageSetup } from '../../shared/types'

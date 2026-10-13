@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { Menu } from './Menu'
+import type { PopoverState } from './Menu'
 
 export const TEXT_COLORS: { name: string; hex: string }[] = [
   { name: 'Black', hex: '#1D1D1F' },
@@ -39,11 +40,11 @@ export const HIGHLIGHT_COLORS: { name: string; hex: string }[] = [
   { name: 'Black', hex: '#000000' }
 ]
 
-export function ColorPicker({ kind, value, onPick, onCustom }: { kind: 'text' | 'highlight'; value: string | null; onPick: (hex: string | null) => void; onCustom?: (hex: string) => void }): ReactNode {
+export function ColorPicker({ pop, kind, value, onPick, onCustom }: { pop: PopoverState; kind: 'text' | 'highlight'; value: string | null; onPick: (hex: string | null) => void; onCustom?: (hex: string) => void }): ReactNode {
   const palette = kind === 'text' ? TEXT_COLORS : HIGHLIGHT_COLORS
   const current = value?.toUpperCase() ?? null
   return (
-    <Menu role="listbox" label={kind === 'text' ? 'Text color' : 'Highlight color'} style={{ minWidth: 0, padding: 0 }}>
+    <Menu pop={pop} role="listbox" label={kind === 'text' ? 'Text color' : 'Highlight color'} style={{ minWidth: 0, padding: 0 }}>
       <div className="q-colors">
         <button type="button" className={['q-swatch', 'none', current === null ? 'is-on' : ''].join(' ')} aria-label={kind === 'text' ? 'Automatic' : 'No highlight'} title={kind === 'text' ? 'Automatic' : 'No highlight'} onMouseDown={(e) => e.preventDefault()} onClick={() => onPick(null)} />
         {palette.map((c) => (

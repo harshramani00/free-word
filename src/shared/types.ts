@@ -45,6 +45,8 @@ export interface SaveRequest {
 export interface ExportPdfRequest {
   suggestedName: string
   pageSetup: PageSetup
+  /** Write here without asking; otherwise a Save dialog is shown. */
+  path?: string
 }
 
 export type SaveResult = { ok: true; path: string; name: string } | { ok: false; canceled: true } | { ok: false; error: string }

@@ -1,4 +1,4 @@
-import { useSyncExternalStore } from 'react'
+import { useRef, useSyncExternalStore } from 'react'
 import { DEFAULT_PAGE_SETUP } from '../../shared/pageSetup'
 import type { CloseReason, JSONContent, PageSetup } from '../../shared/types'
 import { loadPrefs, savePrefs } from './prefs'
@@ -90,8 +90,28 @@ export function subscribe(listener: () => void): () => void {
   return () => listeners.delete(listener)
 }
 
+function shallowEqual(a: unknown, b: unknown): boolean {
+  if (Object.is(a, b)) return true
+  if (typeof a !== 'object' || typeof b !== 'object' || a === null || b === null) return false
+  const ka = Object.keys(a as object)
+  const kb = Object.keys(b as object)
+  if (ka.length !== kb.length) return false
+  return ka.every((k) => Object.is((a as Record<string, unknown>)[k], (b as Record<string, unknown>)[k]))
+}
+
+/** Subscribe to a slice of the store. Selectors may return fresh objects; results are shallow-compared. */
 export function useDocState<T>(selector: (s: DocState) => T): T {
-  return useSyncExternalStore(subscribe, () => selector(state), () => selector(state))
+  const cache = useRef<{ input: DocState; output: T } | null>(null)
+  const getSnapshot = (): T => {
+    const next = selector(state)
+    if (cache.current && (cache.current.input === state || shallowEqual(cache.current.output, next))) {
+      cache.current = { input: state, output: cache.current.output }
+      return cache.current.output
+    }
+    cache.current = { input: state, output: next }
+    return next
+  }
+  return useSyncExternalStore(subscribe, getSnapshot, getSnapshot)
 }
 
 export const clampZoom = (z: number): number => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round(z)))

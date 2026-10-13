@@ -3,6 +3,7 @@ import type { ReactNode } from 'react'
 import { PARAGRAPH_STYLES } from '../../editor/commands'
 import type { ParagraphStyle } from '../../editor/commands'
 import { Menu, MenuItem, MenuSep } from './Menu'
+import type { PopoverState } from './Menu'
 
 const PREVIEW: Record<ParagraphStyle, string> = {
   title: '700 20px/1.2 var(--q-font-doc)',
@@ -13,9 +14,9 @@ const PREVIEW: Record<ParagraphStyle, string> = {
   quote: 'italic 400 13.5px/1.3 var(--q-font-doc)'
 }
 
-export function StylePicker({ current, onPick }: { current: ParagraphStyle; onPick: (s: ParagraphStyle) => void }): ReactNode {
+export function StylePicker({ pop, current, onPick }: { pop: PopoverState; current: ParagraphStyle; onPick: (s: ParagraphStyle) => void }): ReactNode {
   return (
-    <Menu label="Paragraph style" style={{ width: 232 }}>
+    <Menu pop={pop} label="Paragraph style" style={{ width: 232 }}>
       {PARAGRAPH_STYLES.map((s) => (
         <Fragment key={s.id}>
           {s.id === 'body' ? <MenuSep /> : null}

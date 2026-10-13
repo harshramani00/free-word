@@ -67,7 +67,15 @@ function measure(view: EditorView): Measured[] {
       }
       let pos: number
       try {
-        pos = view.posAtDOM(child, 0)
+        // Position just before this block node (posAtDOM(el, 0) is inside it for textblocks).
+        const inside = view.posAtDOM(child, 0)
+        const $inside = view.state.doc.resolve(inside)
+        pos = $inside.depth > 0 ? $inside.before($inside.depth) : inside
+        const node = view.state.doc.nodeAt(pos)
+        if (!node || (node.isAtom && view.nodeDOM(pos) !== child)) {
+          // Atom nodes (hr, page break): posAtDOM already returns the position before them.
+          pos = inside
+        }
       } catch {
         continue
       }
@@ -103,7 +111,8 @@ function computeSpacers(view: EditorView, metrics: PageMetrics): { spacers: Spac
       const nextTop = (page + 1) * stride
       const spacerHeight = nextTop - bottom
       if (spacerHeight > 0.5) {
-        const after = view.state.doc.resolve(block.pos).after() ?? block.pos
+        const node = view.state.doc.nodeAt(block.pos)
+        const after = block.pos + (node ? node.nodeSize : 1)
         spacers.push({ pos: Math.min(after, view.state.doc.content.size), height: spacerHeight })
         added += spacerHeight
       }
@@ -185,21 +194,28 @@ export const Pagination = Extension.create<PaginationOptions>({
     let frame = 0
     let passes = 0
 
+    // A timer rather than requestAnimationFrame: Chromium pauses animation frames while the
+    // window is occluded, which would leave the layout stale until the user brings it forward.
     const schedule = (view: EditorView): void => {
       if (frame) return
-      frame = requestAnimationFrame(() => {
+      frame = window.setTimeout(() => {
         frame = 0
-        const current = paginationKey.getState(view.state)
-        const { spacers, pages } = computeSpacers(view, ext.options.metrics)
-        if (!current) return
-        const changed = !sameSpacers(current.spacers, spacers) || current.pages !== pages
-        if (changed && passes < 3) {
-          passes += 1
-          view.dispatch(view.state.tr.setMeta(SET_SPACERS, { spacers, pages }).setMeta('addToHistory', false))
-        } else {
-          passes = 0
+        if (view.isDestroyed) return
+        try {
+          const current = paginationKey.getState(view.state)
+          const { spacers, pages } = computeSpacers(view, ext.options.metrics)
+          if (!current) return
+          const changed = !sameSpacers(current.spacers, spacers) || current.pages !== pages
+          if (changed && passes < 3) {
+            passes += 1
+            view.dispatch(view.state.tr.setMeta(SET_SPACERS, { spacers, pages }).setMeta('addToHistory', false))
+          } else {
+            passes = 0
+          }
+        } catch (err) {
+          console.error('[quill] pagination failed', err)
         }
-      })
+      }, 16)
     }
 
     return [
@@ -233,7 +249,9 @@ export const Pagination = Extension.create<PaginationOptions>({
             },
             destroy: () => {
               ro.disconnect()
-              if (frame) cancelAnimationFrame(frame)
+              if (frame) window.clearTimeout(frame)
+              frame = 0
+              passes = 0
             }
           }
         }

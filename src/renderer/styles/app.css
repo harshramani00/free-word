@@ -38,7 +38,7 @@ input, textarea, [contenteditable] { user-select: text; }
 
 /* Popovers */
 .q-anchor { position: relative; display: inline-flex; }
-.q-pop { position: absolute; z-index: 60; }
+.q-pop { z-index: 60; }
 .q-pop.below { top: calc(100% + 4px); left: 0; }
 .q-pop.right { top: 0; left: calc(100% + 8px); }
 .q-menu-item { cursor: default; white-space: nowrap; }

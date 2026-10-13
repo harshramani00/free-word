@@ -210,8 +210,13 @@ function EditorHost(): ReactNode {
     [loadToken]
   )
 
+  // The live instance can change (StrictMode re-mounts, loadToken), so bind to it from an effect
+  // rather than relying solely on onCreate.
   useEffect(() => {
+    if (!editor || editor.isDestroyed) return
     editorRef.current = editor
+    markSaved(editor)
+    if (import.meta.env.DEV) (window as unknown as { __quillEditor?: Editor }).__quillEditor = editor
     return () => {
       if (editorRef.current === editor) editorRef.current = null
     }

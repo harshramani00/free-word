@@ -69,7 +69,7 @@ function ChoiceBig<T extends string>({ label, icon, options, value, onPick }: { 
     <Anchor pop={pop}>
       <RBig label={label} icon={icon} pressed={pop.open} onClick={pop.toggle} />
       {pop.open ? (
-        <Menu label={label}>
+        <Menu pop={pop} label={label}>
           {options.map((o) => (
             <MenuItem
               key={o.value}

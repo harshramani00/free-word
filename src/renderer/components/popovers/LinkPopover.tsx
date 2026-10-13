@@ -2,8 +2,9 @@ import { useEffect, useRef, useState } from 'react'
 import type { ReactNode } from 'react'
 import { Btn } from '../controls'
 import { Menu } from './Menu'
+import type { PopoverState } from './Menu'
 
-export function LinkPopover({ initial, onApply, onRemove, onClose }: { initial: string; onApply: (href: string) => void; onRemove: () => void; onClose: () => void }): ReactNode {
+export function LinkPopover({ pop, initial, onApply, onRemove, onClose }: { pop: PopoverState; initial: string; onApply: (href: string) => void; onRemove: () => void; onClose: () => void }): ReactNode {
   const [value, setValue] = useState(initial)
   const ref = useRef<HTMLInputElement>(null)
   useEffect(() => {
@@ -11,7 +12,7 @@ export function LinkPopover({ initial, onApply, onRemove, onClose }: { initial: 
     ref.current?.select()
   }, [])
   return (
-    <Menu role="dialog" label="Link" className="q-linkpop" style={{ minWidth: 0 }}>
+    <Menu pop={pop} role="dialog" label="Link" className="q-linkpop" style={{ minWidth: 0 }}>
       <label className="q-form-label" htmlFor="q-link-url" style={{ textAlign: 'left' }}>
         Link to
       </label>

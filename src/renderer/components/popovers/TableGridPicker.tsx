@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { Menu } from './Menu'
+import type { PopoverState } from './Menu'
 
 const MAX = 8
 
-export function TableGridPicker({ onPick }: { onPick: (rows: number, cols: number) => void }): ReactNode {
+export function TableGridPicker({ pop, onPick }: { pop: PopoverState; onPick: (rows: number, cols: number) => void }): ReactNode {
   const [hover, setHover] = useState<{ r: number; c: number }>({ r: 3, c: 3 })
   const cells: ReactNode[] = []
   for (let r = 1; r <= MAX; r++) {
@@ -24,7 +25,7 @@ export function TableGridPicker({ onPick }: { onPick: (rows: number, cols: numbe
     }
   }
   return (
-    <Menu role="dialog" label="Insert table" style={{ minWidth: 0, padding: 0 }}>
+    <Menu pop={pop} role="dialog" label="Insert table" style={{ minWidth: 0, padding: 0 }}>
       <div className="q-grid">{cells}</div>
       <div className="q-grid-label">
         {hover.r} × {hover.c} table

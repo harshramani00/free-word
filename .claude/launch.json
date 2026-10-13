@@ -4,7 +4,7 @@
     {
       "name": "quill-renderer",
       "runtimeExecutable": "npx",
-      "runtimeArgs": ["electron-vite", "dev", "-w", "--", "--remote-debugging-port=9222"],
+      "runtimeArgs": ["electron-vite", "dev", "-w"],
       "port": 5173
     }
   ]

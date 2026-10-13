@@ -168,7 +168,7 @@ const PATHS: Record<IconName, JSX.Element> = {
   "delete-table": <><path d="M3 4.5h10M6.5 4.5V3h3v1.5M4.5 4.5l.6 8.5h5.8l.6-8.5" /></>,
   "distribute-columns": <><path d="M3 2.5v11M13 2.5v11M5 8h6M6.5 6.5 5 8l1.5 1.5M9.5 6.5 11 8l-1.5 1.5" /></>,
   "distribute-rows": <><path d="M2.5 3h11M2.5 13h11M8 5v6M6.5 6.5 8 5l1.5 1.5M6.5 9.5 8 11l1.5-1.5" /></>,
-  "doc-large": <><path d="M9 25c3-9 9-15 17-18-1 8-7 14-17 18z" /><path d="M9 25l9-9" /><path d="M6.5 27.5 9 25" /></>,
+  "doc-large": <><path d="M4 1.5h5.5L12 4v10.5H4z" /><path d="M9.5 1.5V4H12M6 8h4M6 10.5h4" /></>,
   "export": <><path d="M8 10V2M5 4.8 8 1.8l3 3" /><path d="M5.5 7H4a1 1 0 0 0-1 1v5a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V8a1 1 0 0 0-1-1h-1.5" /></>,
   "find": <><path d="M2.5 7a4.5 4.5 0 1 0 9 0a4.5 4.5 0 1 0-9 0M10.5 10.5 14 14" /></>,
   "focus": <><path d="M2.5 5V2.5H5M11 2.5h2.5V5M13.5 11v2.5H11M5 13.5H2.5V11" /></>,

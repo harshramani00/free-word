@@ -240,13 +240,23 @@ function EditorHost(): ReactNode {
   const tb = useToolbarState(editor)
   const live = useEditorState({
     editor,
-    selector: ({ editor: e }) => ({
-      outline: outlineOf(e),
-      selectionFrom: e.state.selection.from,
-      currentPage: pageAtPos(e.view, e.state.selection.head, paginationMetrics) + 1,
-      words: (e.storage.characterCount as { words: () => number }).words(),
-      characters: (e.storage.characterCount as { characters: () => number }).characters()
-    })
+    selector: ({ editor: e }) => {
+      // While an editor instance is being replaced (new/open) it may not be mounted or fully initialised.
+      const count = e.storage.characterCount as { words?: () => number; characters?: () => number } | undefined
+      let currentPage = 1
+      try {
+        currentPage = pageAtPos(e.view, e.state.selection.head, paginationMetrics) + 1
+      } catch {
+        currentPage = 1
+      }
+      return {
+        outline: outlineOf(e),
+        selectionFrom: e.state.selection.from,
+        currentPage,
+        words: count?.words?.() ?? 0,
+        characters: count?.characters?.() ?? 0
+      }
+    }
   })
 
   useEffect(() => {
@@ -256,7 +266,11 @@ function EditorHost(): ReactNode {
 
   const openExport = useCallback(() => setState({ sheet: { kind: 'export' } }), [])
   const focusSearch = useCallback(() => searchLabelRef.current?.querySelector('input')?.focus(), [])
-  useEffect(() => window.quill.onMenu((a) => handleMenu(a, openExport, focusSearch)), [openExport, focusSearch])
+  useEffect(() => {
+    const run = (a: MenuAction): void => handleMenu(a, openExport, focusSearch)
+    if (import.meta.env.DEV) (window as unknown as { __quillMenu?: (a: MenuAction) => void }).__quillMenu = run
+    return window.quill.onMenu(run)
+  }, [openExport, focusSearch])
 
   const jumpToPage = (index: number): void => {
     const el = canvasRef.current

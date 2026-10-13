@@ -12,6 +12,11 @@ import { App } from './App'
 import { installDevShim } from './devShim'
 
 installDevShim()
+if (import.meta.env.DEV) {
+  const errors: string[] = ((window as unknown as { __quillErrors?: string[] }).__quillErrors = [])
+  window.addEventListener('error', (e) => errors.push(String(e.error?.stack ?? e.message)))
+  window.addEventListener('unhandledrejection', (e) => errors.push(String((e.reason as Error)?.stack ?? e.reason)))
+}
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

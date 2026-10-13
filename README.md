@@ -56,6 +56,12 @@ xattr -d com.apple.quarantine /Applications/Quill.app
 
 Builds you make yourself with `npm run dist` are signed with whatever Apple Development identity is in your keychain, or left unsigned if there is none.
 
+## Releasing
+
+Every push to `main` runs tests and typechecks. When `package.json`'s version has no matching `v<version>` tag yet, the Release workflow also builds the dmg on a macOS runner and publishes a GitHub release with it. So to ship: bump the version, merge to `main`, and the release appears a few minutes later. Merges that keep the same version only run the checks.
+
+Add these repository secrets to get signed and notarised builds instead of ad-hoc signed ones: `CSC_LINK` and `CSC_KEY_PASSWORD` (Developer ID certificate as a base64 `.p12`), `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`.
+
 ## Project layout
 
 | Folder | Contents |

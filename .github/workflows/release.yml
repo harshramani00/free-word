@@ -1,0 +1,111 @@
+# Builds the macOS app and publishes a GitHub release every time a new version
+# lands on main. "New" means package.json's version has no v<version> tag yet,
+# so bumping the version is what triggers a release; other merges only run tests.
+name: Release
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: Test and typecheck
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm test
+
+  release:
+    name: Build dmg and publish
+    needs: test
+    runs-on: macos-14 # Apple Silicon runner, free for public repositories
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read version and check for an existing release
+        id: version
+        run: |
+          VERSION=$(node -p "require('./package.json').version")
+          echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/v$VERSION" >/dev/null; then
+            echo "Tag v$VERSION already exists; nothing to release."
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - uses: actions/setup-node@v4
+        if: steps.version.outputs.release == 'true'
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+        if: steps.version.outputs.release == 'true'
+
+      - name: Build the app bundle
+        if: steps.version.outputs.release == 'true'
+        env:
+          # Real signing + notarisation happen automatically when these secrets exist:
+          #   CSC_LINK, CSC_KEY_PASSWORD (Developer ID certificate as base64 .p12)
+          #   APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          APPLE_ID: ${{ secrets.APPLE_ID }}
+          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.CSC_LINK != '' }}
+        run: |
+          npm run build
+          npx electron-builder --mac --arm64 --dir
+
+      - name: Ad-hoc sign when no certificate is configured
+        if: steps.version.outputs.release == 'true' && env.CSC_LINK == ''
+        env:
+          CSC_LINK: ${{ secrets.CSC_LINK }}
+        run: |
+          # Apple Silicon refuses to run unsigned binaries; an ad-hoc signature lets the app open
+          # after the user chooses Open on first launch (see README).
+          codesign --force --deep --sign - --entitlements build/entitlements.mac.plist --options runtime release/mac-arm64/Quill.app
+          codesign --verify --deep --strict release/mac-arm64/Quill.app
+
+      - name: Package the dmg
+        if: steps.version.outputs.release == 'true'
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: "false"
+        run: npx electron-builder --mac dmg --arm64 --prepackaged release/mac-arm64/Quill.app
+
+      - name: Publish the release
+        if: steps.version.outputs.release == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          DMG="release/Quill-$VERSION-arm64.dmg"
+          SHA=$(shasum -a 256 "$DMG" | cut -d' ' -f1)
+          {
+            cat .github/release-body.md
+            echo
+            echo "SHA-256 \`Quill-$VERSION-arm64.dmg\`: \`$SHA\`"
+          } > /tmp/notes.md
+          gh release create "v$VERSION" "$DMG" \
+            --title "Quill $VERSION" \
+            --notes-file /tmp/notes.md \
+            --generate-notes \
+            --latest

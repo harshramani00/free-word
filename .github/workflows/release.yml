@@ -93,7 +93,7 @@ jobs:
         if: steps.version.outputs.release == 'true'
         run: |
           npm run build
-          npx electron-builder --mac --arm64 --dir
+          npx electron-builder --mac --arm64 --dir --publish never
 
       - name: Ad-hoc sign when no certificate is configured
         if: steps.version.outputs.release == 'true' && env.SIGNED == 'false'
@@ -105,7 +105,7 @@ jobs:
 
       - name: Package the dmg
         if: steps.version.outputs.release == 'true'
-        run: npx electron-builder --mac dmg --arm64 --prepackaged release/mac-arm64/Quill.app
+        run: npx electron-builder --mac dmg --arm64 --prepackaged release/mac-arm64/Quill.app --publish never
 
       - name: Publish the release
         if: steps.version.outputs.release == 'true'

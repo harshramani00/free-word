@@ -23,12 +23,17 @@ export async function exportPdf(win: BrowserWindow, req: ExportPdfRequest): Prom
   }
 
   const m = MARGINS[req.pageSetup.margins]
+  // Chromium paints the window's base background under the page margins, which would print
+  // dark in dark mode. Print on white and restore the window colour afterwards.
+  const previousBackground = win.getBackgroundColor()
+  win.setBackgroundColor('#FFFFFF')
   try {
     const data = await win.webContents.printToPDF({
       pageSize: req.pageSetup.paper === 'a4' ? 'A4' : 'Letter',
       margins: { top: m.topIn, bottom: m.bottomIn, left: m.leftIn, right: m.rightIn },
       printBackground: true,
-      preferCSSPageSize: false,
+      // The renderer writes an @page rule with the same size and margins; prefer it.
+      preferCSSPageSize: true,
       displayHeaderFooter: false,
       landscape: false,
       scale: 1
@@ -37,5 +42,7 @@ export async function exportPdf(win: BrowserWindow, req: ExportPdfRequest): Prom
     return { ok: true, path: filePath, name: basename(filePath, '.pdf') }
   } catch (err) {
     return { ok: false, error: err instanceof Error ? err.message : String(err) }
+  } finally {
+    win.setBackgroundColor(previousBackground)
   }
 }

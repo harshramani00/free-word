@@ -1,6 +1,6 @@
 import type { Editor } from '@tiptap/core'
-import type { CloseReason, JSONContent } from '../../shared/types'
-import { DEFAULT_PAGE_SETUP } from '../../shared/pageSetup'
+import type { CloseReason, JSONContent, PageSetup } from '../../shared/types'
+import { DEFAULT_PAGE_SETUP, MARGINS, PAPER } from '../../shared/pageSetup'
 import type { ExportChoice } from '../components/sheets/ExportSheet'
 import { htmlToDoc } from '../editor/htmlToDoc'
 import { EMPTY_DOC, getState, loadDocument, setState } from './documentStore'
@@ -85,11 +85,27 @@ export async function exportDocument(choice: ExportChoice): Promise<void> {
     }
     return
   }
-  // Give the layout a frame to apply the new page setup before printing.
-  await new Promise((r) => requestAnimationFrame(() => r(null)))
+  // Chromium takes the printed page geometry from an @page rule, so write one for the chosen
+  // paper and margins; the main process also passes the same values to printToPDF.
+  applyPrintPageRule(choice.pageSetup)
+  await new Promise((r) => setTimeout(r, 50))
   const result = await window.quill.exportPdf({ suggestedName: choice.fileName, pageSetup: choice.pageSetup })
   if (!result.ok && 'error' in result) setState({ notice: `PDF export failed: ${result.error}` })
   else if (result.ok) setState({ notice: `Exported ${result.name}.pdf` })
+}
+
+/** Keeps a single <style> with the @page rule for the current export in sync. */
+export function applyPrintPageRule(setup: PageSetup): void {
+  const id = 'q-print-page'
+  let el = document.getElementById(id) as HTMLStyleElement | null
+  if (!el) {
+    el = document.createElement('style')
+    el.id = id
+    document.head.appendChild(el)
+  }
+  const paper = PAPER[setup.paper]
+  const m = MARGINS[setup.margins]
+  el.textContent = `@page { size: ${paper.widthIn}in ${paper.heightIn}in; margin: ${m.topIn}in ${m.rightIn}in ${m.bottomIn}in ${m.leftIn}in; }`
 }
 
 export function exportPdfQuick(): void {

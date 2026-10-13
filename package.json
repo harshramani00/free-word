@@ -2,7 +2,7 @@
   "name": "quill",
   "productName": "Quill",
   "version": "0.1.0",
-  "description": "A macOS word processor that saves real .docx files.",
+  "description": "Quill \u2014 a free Word alternative for macOS. Writes real .docx files, exports PDF, no cloud, no AI.",
   "private": true,
   "main": "./out/main/index.js",
   "author": "Harsh Ramani",
@@ -50,5 +50,10 @@
     "typescript": "^7.0.2",
     "vite": "^7.3.7",
     "vitest": "^4.1.11"
+  },
+  "homepage": "https://github.com/harshramani00/quill",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/harshramani00/quill.git"
   }
 }

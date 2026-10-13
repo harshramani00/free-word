@@ -145,7 +145,7 @@ export function buildAppMenu(): Menu {
     submenu: [
       {
         label: 'Quill on GitHub',
-        click: () => void shell.openExternal('https://github.com/harshramani00/free-word')
+        click: () => void shell.openExternal('https://github.com/harshramani00/quill')
       }
     ]
   }

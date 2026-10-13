@@ -1,6 +1,10 @@
-# Quill
+# Quill — a free Word alternative for macOS
 
-A macOS word processor that saves real `.docx` files. Electron + TipTap (ProseMirror), no network, no telemetry, no AI.
+Quill is a free, open-source word processor for the Mac. It opens and saves real `.docx` files that work in Microsoft Word, Pages and Google Docs, exports PDF, and runs entirely on your machine: no account, no cloud, no telemetry, no AI.
+
+**[Download the latest release](https://github.com/harshramani00/quill/releases/latest)** (Apple Silicon `.dmg`)
+
+Built with Electron and TipTap (ProseMirror).
 
 Quill follows the Quill design canvas: start screen with recent files, a document window with a Full (tabs + ribbon) or Simple toolbar, paginated US Letter / A4 page sheets, an outline sidebar, a status bar with zoom, and export / unsaved-changes sheets. Light and dark mode follow the macOS appearance.
 
@@ -42,7 +46,15 @@ npm run build     # compiles main, preload and renderer into out/
 npm run dist      # builds and packages release/Quill-<version>-arm64.dmg
 ```
 
-electron-builder signs the app with whatever Apple Development identity is in your keychain (or leaves it unsigned if there is none) and does not notarise it. To run it on another Mac the first time, right-click the app and choose Open, or clear the quarantine attribute with `xattr -d com.apple.quarantine /Applications/Quill.app`.
+## Installing a downloaded build
+
+The release builds are not notarised with Apple (that needs a paid Developer ID). macOS will therefore warn the first time. After dragging Quill to Applications, either right-click the app and choose **Open**, or run:
+
+```bash
+xattr -d com.apple.quarantine /Applications/Quill.app
+```
+
+Builds you make yourself with `npm run dist` are signed with whatever Apple Development identity is in your keychain, or left unsigned if there is none.
 
 ## Project layout
 

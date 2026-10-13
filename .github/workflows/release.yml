@@ -59,26 +59,44 @@ jobs:
       - run: npm ci
         if: steps.version.outputs.release == 'true'
 
-      - name: Build the app bundle
+      - name: Configure signing
         if: steps.version.outputs.release == 'true'
         env:
           # Real signing + notarisation happen automatically when these secrets exist:
           #   CSC_LINK, CSC_KEY_PASSWORD (Developer ID certificate as base64 .p12)
           #   APPLE_ID, APPLE_APP_SPECIFIC_PASSWORD, APPLE_TEAM_ID
-          CSC_LINK: ${{ secrets.CSC_LINK }}
-          CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
-          APPLE_ID: ${{ secrets.APPLE_ID }}
-          APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
-          APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-          CSC_IDENTITY_AUTO_DISCOVERY: ${{ secrets.CSC_LINK != '' }}
+          SECRET_CSC_LINK: ${{ secrets.CSC_LINK }}
+          SECRET_CSC_KEY_PASSWORD: ${{ secrets.CSC_KEY_PASSWORD }}
+          SECRET_APPLE_ID: ${{ secrets.APPLE_ID }}
+          SECRET_APPLE_APP_SPECIFIC_PASSWORD: ${{ secrets.APPLE_APP_SPECIFIC_PASSWORD }}
+          SECRET_APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
+        run: |
+          if [ -n "$SECRET_CSC_LINK" ]; then
+            echo "Developer ID certificate configured: signing and notarising."
+            {
+              echo "CSC_LINK=$SECRET_CSC_LINK"
+              echo "CSC_KEY_PASSWORD=$SECRET_CSC_KEY_PASSWORD"
+              echo "APPLE_ID=$SECRET_APPLE_ID"
+              echo "APPLE_APP_SPECIFIC_PASSWORD=$SECRET_APPLE_APP_SPECIFIC_PASSWORD"
+              echo "APPLE_TEAM_ID=$SECRET_APPLE_TEAM_ID"
+              echo "SIGNED=true"
+            } >> "$GITHUB_ENV"
+          else
+            echo "No certificate secrets: building with an ad-hoc signature."
+            {
+              echo "CSC_IDENTITY_AUTO_DISCOVERY=false"
+              echo "SIGNED=false"
+            } >> "$GITHUB_ENV"
+          fi
+
+      - name: Build the app bundle
+        if: steps.version.outputs.release == 'true'
         run: |
           npm run build
           npx electron-builder --mac --arm64 --dir
 
       - name: Ad-hoc sign when no certificate is configured
-        if: steps.version.outputs.release == 'true' && env.CSC_LINK == ''
-        env:
-          CSC_LINK: ${{ secrets.CSC_LINK }}
+        if: steps.version.outputs.release == 'true' && env.SIGNED == 'false'
         run: |
           # Apple Silicon refuses to run unsigned binaries; an ad-hoc signature lets the app open
           # after the user chooses Open on first launch (see README).
@@ -87,8 +105,6 @@ jobs:
 
       - name: Package the dmg
         if: steps.version.outputs.release == 'true'
-        env:
-          CSC_IDENTITY_AUTO_DISCOVERY: "false"
         run: npx electron-builder --mac dmg --arm64 --prepackaged release/mac-arm64/Quill.app
 
       - name: Publish the release

@@ -44,6 +44,7 @@
     "electron": "^44.7.0",
     "electron-builder": "^26.15.3",
     "electron-vite": "^5.0.0",
+    "happy-dom": "^21.0.1",
     "typescript": "^7.0.2",
     "vite": "^7.3.7",
     "vitest": "^4.1.11"

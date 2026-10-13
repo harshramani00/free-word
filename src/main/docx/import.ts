@@ -1,12 +1,14 @@
-import { generateJSON } from '@tiptap/html/server'
 import mammoth from 'mammoth'
-import { schemaExtensions } from '../../shared/schema/extensions'
-import type { JSONContent, PageSetup } from '../../shared/types'
+import type { PageSetup } from '../../shared/types'
 import { prepassDocx } from './importPrepass'
 import { ComboRegistry, expandClasses, tagDocument } from './importStyleMap'
 
+/**
+ * Result of importing a .docx: HTML that the editor schema can parse (the renderer turns it into
+ * TipTap JSON with a real DOM), plus the page setup read from the section properties.
+ */
 export interface ImportResult {
-  json: JSONContent
+  html: string
   pageSetup: PageSetup
   warnings: string[]
 }
@@ -66,7 +68,5 @@ export async function docxToHtml(input: Buffer): Promise<{ html: string; pageSet
 }
 
 export async function importDocx(input: Buffer): Promise<ImportResult> {
-  const { html, pageSetup, warnings } = await docxToHtml(input)
-  const json = generateJSON(html, schemaExtensions()) as JSONContent
-  return { json, pageSetup, warnings }
+  return docxToHtml(input)
 }

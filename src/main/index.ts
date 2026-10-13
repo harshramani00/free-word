@@ -4,6 +4,10 @@ import type { CloseReason, DocumentState } from '../shared/types'
 import { openDocumentFromPath, registerIpc } from './ipc'
 import { buildAppMenu } from './menu'
 import { createMainWindow } from './window'
+import { installErrorLogging, log } from './log'
+
+installErrorLogging()
+log('main starting', { packaged: app.isPackaged, argv: process.argv.slice(1), version: app.getVersion(), electron: process.versions.electron })
 
 let win: BrowserWindow | null = null
 let docState: DocumentState = { title: 'Quill', path: null, dirty: false }
@@ -28,6 +32,7 @@ async function sendOpen(filePath: string): Promise<void> {
     const doc = await openDocumentFromPath(filePath)
     win.webContents.send(IPC.openDocument, doc)
   } catch (err) {
+    log('open failed', filePath, err instanceof Error ? err : String(err))
     console.error('Failed to open', filePath, err)
   }
 }
@@ -92,6 +97,7 @@ nativeTheme.on('updated', () => {
 })
 
 void app.whenReady().then(() => {
+  log('app ready')
   app.setName('Quill')
   Menu.setApplicationMenu(buildAppMenu())
   createWindow()

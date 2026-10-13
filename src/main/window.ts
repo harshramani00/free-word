@@ -1,5 +1,6 @@
 import { BrowserWindow, nativeTheme, shell } from 'electron'
 import { join } from 'node:path'
+import { log } from './log'
 
 export function createMainWindow(): BrowserWindow {
   const win = new BrowserWindow({
@@ -21,7 +22,12 @@ export function createMainWindow(): BrowserWindow {
     }
   })
 
-  win.on('ready-to-show', () => win.show())
+  win.on('ready-to-show', () => {
+    log('window ready-to-show')
+    win.show()
+  })
+  win.webContents.on('did-fail-load', (_e, code, desc, url) => log('did-fail-load', code, desc, url))
+  win.webContents.on('render-process-gone', (_e, details) => log('render-process-gone', details))
 
   // Never navigate away or open windows from the renderer; links go to the system browser.
   win.webContents.setWindowOpenHandler(({ url }) => {

@@ -2,6 +2,7 @@ import type { Editor } from '@tiptap/core'
 import type { CloseReason, JSONContent } from '../../shared/types'
 import { DEFAULT_PAGE_SETUP } from '../../shared/pageSetup'
 import type { ExportChoice } from '../components/sheets/ExportSheet'
+import { htmlToDoc } from '../editor/htmlToDoc'
 import { EMPTY_DOC, getState, loadDocument, setState } from './documentStore'
 import type { PendingIntent } from './documentStore'
 
@@ -45,13 +46,14 @@ export async function openDocument(path?: string): Promise<void> {
     setState({ notice: `Could not open file: ${doc.error}` })
     return
   }
-  loadDocument(doc.json, { path: doc.path, name: doc.name, pageSetup: doc.pageSetup, notice: doc.warnings.length ? `Opened with ${doc.warnings.length} import ${doc.warnings.length === 1 ? 'note' : 'notes'}` : null })
+  loadDocument(htmlToDoc(doc.html), { path: doc.path, name: doc.name, pageSetup: doc.pageSetup, notice: doc.warnings.length ? `Opened with ${doc.warnings.length} import ${doc.warnings.length === 1 ? 'note' : 'notes'}` : null })
 }
 
 /** A document opened from Finder / the Dock. */
-export function receiveOpenedDocument(doc: { path: string; name: string; json: JSONContent; pageSetup: typeof DEFAULT_PAGE_SETUP }): void {
-  if (guard({ kind: 'openDocument', ...doc })) return
-  loadDocument(doc.json, { path: doc.path, name: doc.name, pageSetup: doc.pageSetup })
+export function receiveOpenedDocument(doc: { path: string; name: string; html: string; pageSetup: typeof DEFAULT_PAGE_SETUP }): void {
+  const json = htmlToDoc(doc.html)
+  if (guard({ kind: 'openDocument', path: doc.path, name: doc.name, json, pageSetup: doc.pageSetup })) return
+  loadDocument(json, { path: doc.path, name: doc.name, pageSetup: doc.pageSetup })
 }
 
 export async function saveDocument(opts: { as?: boolean } = {}): Promise<boolean> {

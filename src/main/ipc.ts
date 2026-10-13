@@ -29,9 +29,9 @@ const IMAGE_FILTER = [{ name: 'Images', extensions: ['png', 'jpg', 'jpeg', 'gif'
 
 export async function openDocumentFromPath(filePath: string): Promise<OpenedDocument> {
   const buffer = await fs.readFile(filePath)
-  const { json, pageSetup, warnings } = await importDocx(buffer)
+  const { html, pageSetup, warnings } = await importDocx(buffer)
   await addRecent(filePath)
-  return { path: filePath, name: basename(filePath, extname(filePath)), json, pageSetup, warnings }
+  return { path: filePath, name: basename(filePath, extname(filePath)), html, pageSetup, warnings }
 }
 
 async function writeDocx(filePath: string, req: SaveRequest): Promise<SaveResult> {

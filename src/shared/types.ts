@@ -29,7 +29,8 @@ export interface RecentEntry {
 export interface OpenedDocument {
   path: string
   name: string
-  json: JSONContent
+  /** Document body as HTML in the editor's schema; the renderer parses it into TipTap JSON. */
+  html: string
   pageSetup: PageSetup
   warnings: string[]
 }

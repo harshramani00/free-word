@@ -1,9 +1,17 @@
 import { describe, expect, it } from 'vitest'
+import { generateJSON } from '@tiptap/html/server'
 import { buildDocx } from '../src/main/docx/build'
-import { importDocx } from '../src/main/docx/import'
+import { importDocx as importDocxHtml } from '../src/main/docx/import'
+import { schemaExtensions } from '../src/shared/schema/extensions'
 import { DEFAULT_PAGE_SETUP } from '../src/shared/pageSetup'
 import type { JSONContent } from '../src/shared/types'
 import { RED_PNG_BASE64, sampleDoc } from './fixtures/sampleDoc'
+
+/** What the app does end to end: main produces HTML, the renderer parses it with the editor schema. */
+async function importDocx(buffer: Buffer): Promise<{ json: JSONContent; pageSetup: { paper: string; margins: string }; warnings: string[] }> {
+  const { html, pageSetup, warnings } = await importDocxHtml(buffer)
+  return { json: generateJSON(html, schemaExtensions()) as JSONContent, pageSetup, warnings }
+}
 
 function walk(node: JSONContent, visit: (n: JSONContent) => void): void {
   visit(node)

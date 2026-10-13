@@ -42,7 +42,7 @@ npm run build     # compiles main, preload and renderer into out/
 npm run dist      # builds and packages release/Quill-<version>-arm64.dmg
 ```
 
-The dmg is unsigned. To run it locally the first time, right-click the app and choose Open, or clear the quarantine attribute with `xattr -d com.apple.quarantine /Applications/Quill.app`.
+electron-builder signs the app with whatever Apple Development identity is in your keychain (or leaves it unsigned if there is none) and does not notarise it. To run it on another Mac the first time, right-click the app and choose Open, or clear the quarantine attribute with `xattr -d com.apple.quarantine /Applications/Quill.app`.
 
 ## Project layout
 
@@ -60,7 +60,7 @@ The dmg is unsigned. To run it locally the first time, right-click the app and c
 
 Paragraph styles map to Word's built-in style ids (`Title`, `Heading1`–`Heading3`, `Quote`), so Word's navigation pane and table of contents work. Lists use real numbering definitions (bullets cycle • ◦ ▪, numbers cycle 1. a. i.), each top-level numbered list restarts at 1. Tables carry a repeating header row, merged cells (`gridSpan` / `vMerge`) and column widths. Images are embedded as media parts. Links are external hyperlinks with the `Hyperlink` character style. Page size and margins are written to the section properties and read back on open.
 
-On import, mammoth converts the structure. Because mammoth's document model has no text colour, a pre-pass tags coloured or shaded runs with synthetic character styles and records picture sizes, and a generated style map carries alignment, indentation, font family, font size and highlight through to TipTap.
+On import, mammoth converts the structure. Because mammoth's document model has no text colour, a pre-pass tags coloured or shaded runs with synthetic character styles and records picture sizes, and a generated style map carries alignment, indentation, font family, font size and highlight through to the HTML, which the renderer parses with the editor schema.
 
 ## Keyboard shortcuts
 
@@ -76,4 +76,4 @@ On import, mammoth converts the structure. Because mammoth's document model has 
 - **Fonts.** The bundled document font is Source Serif 4; other choices in the font picker rely on fonts installed on the Mac.
 - **Ribbon controls** for non-MVP features (Review, References, most of Insert and Layout, Find/Replace, formatting marks, table styles) are shown as in the design but disabled.
 - **PDF export** uses Chromium's print engine with the chosen paper size and margins; hyperlinks are preserved but there are no PDF bookmarks.
-- The app is unsigned and not notarised.
+- The app is not notarised; signing uses whatever Apple Development identity is available locally.

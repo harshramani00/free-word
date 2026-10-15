@@ -1,7 +1,7 @@
 {
   "name": "quill",
   "productName": "Quill",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "Quill — a free Word alternative for macOS. Writes real .docx files, exports PDF, no telemetry, no built-in AI; optional self-hosted cloud sync and Claude (MCP) access.",
   "private": true,
   "main": "./out/main/index.js",

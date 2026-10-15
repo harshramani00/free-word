@@ -134,7 +134,9 @@
 .q-sync.is-button { appearance: none; border: 0; background: transparent; font: var(--q-type-caption); color: var(--q-text-secondary); cursor: default; }
 .q-sync.is-button.is-attention { background: var(--q-accent-tint); color: var(--q-accent-text); font: var(--q-type-caption-strong); }
 .q-setup-wrap { position: absolute; inset: 0; z-index: 72; display: flex; align-items: center; justify-content: center; }
-.q-setup { animation: q-setup-in var(--q-dur-sheet) var(--q-ease); }
+/* The scrim is absolutely positioned with a high z-index app-wide; inside the wrap the card must sit above it or it swallows every click. */
+.q-setup-wrap .q-scrim { z-index: 0; }
+.q-setup-wrap .q-setup { position: relative; z-index: 1; animation: q-setup-in var(--q-dur-sheet) var(--q-ease); }
 @keyframes q-setup-in { from { transform: translateY(12px) scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
 .q-setup input.q-field { width: 100%; height: 36px; font: var(--q-type-body); }
 .q-versions.q-float { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(var(--q-statusbar-h) + 8px); z-index: 65; max-height: 60vh; overflow-y: auto; }

@@ -1,6 +1,7 @@
 import { app, BrowserWindow, Menu, nativeTheme } from 'electron'
 import { IPC } from '../shared/ipc'
 import type { CloseReason, DocumentState } from '../shared/types'
+import { startCloud } from './cloud'
 import { openDocumentFromPath, registerIpc } from './ipc'
 import { buildAppMenu } from './menu'
 import { createMainWindow } from './window'
@@ -99,6 +100,7 @@ nativeTheme.on('updated', () => {
 void app.whenReady().then(() => {
   log('app ready')
   app.setName('Quill')
+  startCloud()
   Menu.setApplicationMenu(buildAppMenu())
   createWindow()
   const argPath = process.argv.slice(app.isPackaged ? 1 : 2).find((a) => a.toLowerCase().endsWith('.docx'))

@@ -1,0 +1,23 @@
+<!--
+  WinSW service definition for Quill Cloud.
+  Place this file next to a renamed WinSW executable (quill-cloud.exe) in C:\quill-cloud,
+  then run:  quill-cloud.exe install   and   quill-cloud.exe start
+  WinSW: https://github.com/winsw/winsw (download WinSW-x64.exe, rename to quill-cloud.exe)
+-->
+<service>
+  <id>quill-cloud</id>
+  <name>Quill Cloud</name>
+  <description>Self-hosted sync and Claude (MCP) server for Quill documents.</description>
+  <executable>C:\Program Files\nodejs\node.exe</executable>
+  <arguments>--env-file=C:\quill-cloud\.env C:\quill-cloud\server.mjs serve</arguments>
+  <workingdirectory>C:\quill-cloud</workingdirectory>
+  <startmode>Automatic</startmode>
+  <onfailure action="restart" delay="10 sec" />
+  <onfailure action="restart" delay="30 sec" />
+  <resetfailure>1 hour</resetfailure>
+  <log mode="roll-by-size">
+    <sizeThreshold>10240</sizeThreshold>
+    <keepFiles>8</keepFiles>
+  </log>
+  <stoptimeout>15 sec</stoptimeout>
+</service>

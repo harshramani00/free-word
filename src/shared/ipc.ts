@@ -14,9 +14,25 @@ export const IPC = {
   windowDocumentState: 'window:document-state',
   windowCloseConfirmed: 'window:close-confirmed',
   windowCloseCanceled: 'window:close-canceled',
+  cloudState: 'cloud:state',
+  cloudList: 'cloud:list',
+  cloudRefresh: 'cloud:refresh',
+  cloudSignIn: 'cloud:sign-in',
+  cloudSignOut: 'cloud:sign-out',
+  cloudSetEnabled: 'cloud:set-enabled',
+  cloudChooseFolder: 'cloud:choose-folder',
+  cloudDownload: 'cloud:download',
+  cloudRemoveDownload: 'cloud:remove-download',
+  cloudStopSyncing: 'cloud:stop-syncing',
+  cloudUpload: 'cloud:upload',
+  cloudVersions: 'cloud:versions',
+  cloudRestore: 'cloud:restore',
+  cloudDisconnectApp: 'cloud:disconnect-app',
   // main → renderer
   themeChanged: 'theme:changed',
   menuAction: 'menu:action',
   openDocument: 'app:open-document',
-  confirmClose: 'app:confirm-close'
+  confirmClose: 'app:confirm-close',
+  cloudStateChanged: 'cloud:state-changed',
+  cloudListChanged: 'cloud:list-changed'
 } as const

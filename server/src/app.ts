@@ -4,6 +4,7 @@ import { changeRoutes } from './api/changes'
 import { documentRoutes } from './api/documents'
 import { requireBearer } from './auth/middleware'
 import { ensureBuiltinClients, oauthRoutes } from './auth/oauth'
+import { mcpRoutes } from './mcp/server'
 import { HttpError } from './service/documents'
 import type { AppDeps, Env } from './types'
 
@@ -24,6 +25,7 @@ export function createApp(deps: AppDeps): Hono<Env> {
 
   app.get('/healthz', (c) => c.json({ ok: true, name: 'quill-cloud' }))
   app.route('/', oauthRoutes(deps))
+  app.route('/', mcpRoutes(deps))
 
   const api = new Hono<Env>()
   api.use('*', requireBearer(deps))

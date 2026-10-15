@@ -1,6 +1,6 @@
 import { useRef, useSyncExternalStore } from 'react'
 import { DEFAULT_PAGE_SETUP } from '../../shared/pageSetup'
-import type { CloseReason, JSONContent, PageSetup } from '../../shared/types'
+import type { CloseReason, JSONContent, OpenedDocument, PageSetup } from '../../shared/types'
 import { loadPrefs, savePrefs } from './prefs'
 import type { ToolbarMode } from './prefs'
 
@@ -10,17 +10,30 @@ export type RibbonTab = 'home' | 'insert' | 'layout' | 'references' | 'review' |
 export type PendingIntent =
   | { kind: 'new'; content: JSONContent | null }
   | { kind: 'open'; path?: string }
-  | { kind: 'openDocument'; path: string; name: string; json: JSONContent; pageSetup: PageSetup }
+  | { kind: 'openDocument'; doc: OpenedDocument }
+  | { kind: 'cloudDownload'; docId: string; version?: number }
+  | { kind: 'cloudRestore'; docId: string; version: number }
   | { kind: 'close'; reason: CloseReason }
   | { kind: 'start' }
 
-export type Sheet = { kind: 'export' } | { kind: 'unsaved'; intent: PendingIntent } | null
+export type Sheet =
+  | { kind: 'export' }
+  | { kind: 'unsaved'; intent: PendingIntent }
+  /** The cloud holds a newer version of the document the user is opening. */
+  | { kind: 'newer'; doc: OpenedDocument }
+  | { kind: 'cloudSettings' }
+  | { kind: 'cloudSetup' }
+  | null
 
 export interface DocState {
   screen: 'start' | 'editor'
   path: string | null
   name: string
   dirty: boolean
+  /** Set when the open document is a synced cloud document. */
+  cloudDocId: string | null
+  /** The version-history popover (editor only). */
+  historyOpen: boolean
   pageSetup: PageSetup
   zoom: number
   toolbarMode: ToolbarMode
@@ -50,6 +63,8 @@ let state: DocState = {
   path: null,
   name: 'Untitled',
   dirty: false,
+  cloudDocId: null,
+  historyOpen: false,
   pageSetup: DEFAULT_PAGE_SETUP,
   zoom: prefs.zoom,
   toolbarMode: prefs.toolbarMode,
@@ -117,12 +132,14 @@ export function useDocState<T>(selector: (s: DocState) => T): T {
 export const clampZoom = (z: number): number => Math.max(ZOOM_MIN, Math.min(ZOOM_MAX, Math.round(z)))
 
 /** Loads a document into the editor screen. */
-export function loadDocument(json: JSONContent, meta: { path: string | null; name: string; pageSetup: PageSetup; notice?: string | null }): void {
+export function loadDocument(json: JSONContent, meta: { path: string | null; name: string; pageSetup: PageSetup; notice?: string | null; cloudDocId?: string | null }): void {
   setState((prev) => ({
     screen: 'editor',
     path: meta.path,
     name: meta.name,
     dirty: false,
+    cloudDocId: meta.cloudDocId ?? null,
+    historyOpen: false,
     pageSetup: meta.pageSetup,
     pendingContent: json,
     loadToken: prev.loadToken + 1,

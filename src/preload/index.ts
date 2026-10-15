@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from 'electron'
 import { IPC } from '../shared/ipc'
+import type { CloudRow, CloudState } from '../shared/cloud'
 import type {
   CloseReason,
   DocumentState,
@@ -40,7 +41,24 @@ const api: QuillApi = {
   recentList: () => ipcRenderer.invoke(IPC.recentList),
   recentRemove: (path) => ipcRenderer.invoke(IPC.recentRemove, path),
 
-  setDocumentState: (state: DocumentState) => ipcRenderer.send(IPC.windowDocumentState, state)
+  setDocumentState: (state: DocumentState) => ipcRenderer.send(IPC.windowDocumentState, state),
+
+  cloudState: () => ipcRenderer.invoke(IPC.cloudState),
+  onCloudState: (cb) => subscribe<CloudState>(IPC.cloudStateChanged, cb),
+  cloudList: () => ipcRenderer.invoke(IPC.cloudList),
+  onCloudList: (cb) => subscribe<CloudRow[]>(IPC.cloudListChanged, cb),
+  cloudRefresh: () => ipcRenderer.invoke(IPC.cloudRefresh),
+  cloudSignIn: (serverUrl) => ipcRenderer.invoke(IPC.cloudSignIn, serverUrl),
+  cloudSignOut: () => ipcRenderer.invoke(IPC.cloudSignOut),
+  cloudSetEnabled: (enabled) => ipcRenderer.invoke(IPC.cloudSetEnabled, enabled),
+  cloudChooseFolder: () => ipcRenderer.invoke(IPC.cloudChooseFolder),
+  cloudDownload: (docId, version) => ipcRenderer.invoke(IPC.cloudDownload, docId, version),
+  cloudRemoveDownload: (docId) => ipcRenderer.invoke(IPC.cloudRemoveDownload, docId),
+  cloudStopSyncing: (docId) => ipcRenderer.invoke(IPC.cloudStopSyncing, docId),
+  cloudUpload: (path) => ipcRenderer.invoke(IPC.cloudUpload, path),
+  cloudVersions: (docId) => ipcRenderer.invoke(IPC.cloudVersions, docId),
+  cloudRestore: (docId, version) => ipcRenderer.invoke(IPC.cloudRestore, docId, version),
+  cloudDisconnectApp: (id) => ipcRenderer.invoke(IPC.cloudDisconnectApp, id)
 }
 
 contextBridge.exposeInMainWorld('quill', api)

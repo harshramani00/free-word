@@ -1,5 +1,6 @@
 import type { Editor } from '@tiptap/core'
-import type { CloseReason, JSONContent, PageSetup } from '../../shared/types'
+import type { CloudRow } from '../../shared/cloud'
+import type { CloseReason, JSONContent, OpenedDocument, PageSetup } from '../../shared/types'
 import { DEFAULT_PAGE_SETUP, MARGINS, PAPER } from '../../shared/pageSetup'
 import type { ExportChoice } from '../components/sheets/ExportSheet'
 import { htmlToDoc } from '../editor/htmlToDoc'
@@ -33,27 +34,103 @@ function guard(intent: PendingIntent): boolean {
   return false
 }
 
+const errorText = (err: unknown): string => (err instanceof Error ? err.message : String(err))
+
 export function newDocument(content: JSONContent | null): void {
   if (guard({ kind: 'new', content })) return
   loadDocument(content ?? EMPTY_DOC, { path: null, name: 'Untitled', pageSetup: DEFAULT_PAGE_SETUP })
 }
 
+/**
+ * Shows an opened file. When the cloud is ahead of the local copy this is the one
+ * place Quill asks a sync question: the "newer version" sheet, before anything loads.
+ */
+export function presentOpened(doc: OpenedDocument): void {
+  if (doc.cloudNewer) {
+    setState({ sheet: { kind: 'newer', doc } })
+    return
+  }
+  const notes = doc.warnings.length
+  loadDocument(htmlToDoc(doc.html), { path: doc.path, name: doc.name, pageSetup: doc.pageSetup, cloudDocId: doc.cloudDocId ?? null, notice: notes ? `Opened with ${notes} import ${notes === 1 ? 'note' : 'notes'}` : null })
+}
+
 export async function openDocument(path?: string): Promise<void> {
   if (guard({ kind: 'open', path })) return
-  const doc = path ? await window.quill.openPath(path).catch((err: unknown) => ({ error: String(err) })) : await window.quill.openDialog()
+  const doc = path ? await window.quill.openPath(path).catch((err: unknown) => ({ error: errorText(err) })) : await window.quill.openDialog()
   if (!doc) return
   if ('error' in doc) {
     setState({ notice: `Could not open file: ${doc.error}` })
     return
   }
-  loadDocument(htmlToDoc(doc.html), { path: doc.path, name: doc.name, pageSetup: doc.pageSetup, notice: doc.warnings.length ? `Opened with ${doc.warnings.length} import ${doc.warnings.length === 1 ? 'note' : 'notes'}` : null })
+  presentOpened(doc)
 }
 
 /** A document opened from Finder / the Dock. */
-export function receiveOpenedDocument(doc: { path: string; name: string; html: string; pageSetup: typeof DEFAULT_PAGE_SETUP }): void {
-  const json = htmlToDoc(doc.html)
-  if (guard({ kind: 'openDocument', path: doc.path, name: doc.name, json, pageSetup: doc.pageSetup })) return
-  loadDocument(json, { path: doc.path, name: doc.name, pageSetup: doc.pageSetup })
+export function receiveOpenedDocument(doc: OpenedDocument): void {
+  if (guard({ kind: 'openDocument', doc })) return
+  presentOpened(doc)
+}
+
+/** "Keep Mine" on the newer-version sheet: open the local copy; the next save becomes newest. */
+export function keepMine(doc: OpenedDocument): void {
+  presentOpened({ ...doc, cloudNewer: null })
+}
+
+/** "Fetch Newer Version": replace the local copy with the cloud's newest and open it. */
+export async function fetchNewer(docId: string, version?: number): Promise<void> {
+  setState({ sheet: null })
+  try {
+    const fresh = await window.quill.cloudDownload(docId, version)
+    presentOpened({ ...fresh, cloudNewer: null })
+  } catch (err) {
+    setState({ notice: `Could not fetch from the cloud: ${errorText(err)}` })
+  }
+}
+
+/** Downloads (if needed) and opens a row from the Cloud section of the start screen. */
+export async function openCloudRow(row: CloudRow): Promise<void> {
+  if (row.localPath && row.status !== 'cloud-only') {
+    await openDocument(row.localPath)
+    return
+  }
+  if (guard({ kind: 'cloudDownload', docId: row.id })) return
+  await fetchNewer(row.id)
+}
+
+/** From the editor's status pill: pull the newer cloud version into the open document. */
+export async function fetchNewerForOpenDocument(): Promise<void> {
+  const { cloudDocId } = getState()
+  if (!cloudDocId) return
+  if (guard({ kind: 'cloudDownload', docId: cloudDocId })) return
+  await fetchNewer(cloudDocId)
+}
+
+export async function restoreVersion(docId: string, version: number): Promise<void> {
+  if (guard({ kind: 'cloudRestore', docId, version })) return
+  setState({ sheet: null, historyOpen: false })
+  try {
+    const fresh = await window.quill.cloudRestore(docId, version)
+    presentOpened({ ...fresh, cloudNewer: null })
+  } catch (err) {
+    setState({ notice: `Could not restore that version: ${errorText(err)}` })
+  }
+}
+
+/** Starts syncing the open document (it must be saved to disk first). */
+export async function uploadOpenDocument(): Promise<void> {
+  const { path } = getState()
+  if (!path) {
+    const saved = await saveDocument()
+    if (!saved) return
+  }
+  const p = getState().path
+  if (!p) return
+  try {
+    const row = await window.quill.cloudUpload(p)
+    setState({ cloudDocId: row.id, notice: null })
+  } catch (err) {
+    setState({ notice: `Could not upload to the cloud: ${errorText(err)}` })
+  }
 }
 
 export async function saveDocument(opts: { as?: boolean } = {}): Promise<boolean> {
@@ -127,7 +204,7 @@ export function requestClose(reason: CloseReason): void {
 
 export function goToStart(): void {
   if (guard({ kind: 'start' })) return
-  setState({ screen: 'start', sheet: null, dirty: false, path: null, name: 'Untitled' })
+  setState({ screen: 'start', sheet: null, dirty: false, path: null, name: 'Untitled', cloudDocId: null, historyOpen: false })
 }
 
 /** Carry out what the user wanted before the unsaved-changes sheet interrupted. */
@@ -141,13 +218,19 @@ export async function runIntent(intent: PendingIntent): Promise<void> {
       await openDocument(intent.path)
       break
     case 'openDocument':
-      loadDocument(intent.json, { path: intent.path, name: intent.name, pageSetup: intent.pageSetup })
+      presentOpened(intent.doc)
+      break
+    case 'cloudDownload':
+      await fetchNewer(intent.docId, intent.version)
+      break
+    case 'cloudRestore':
+      await restoreVersion(intent.docId, intent.version)
       break
     case 'close':
       window.quill.closeConfirmed(intent.reason)
       break
     case 'start':
-      setState({ screen: 'start', path: null, name: 'Untitled' })
+      setState({ screen: 'start', path: null, name: 'Untitled', cloudDocId: null, historyOpen: false })
       break
   }
 }

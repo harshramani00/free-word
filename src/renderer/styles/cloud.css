@@ -1,0 +1,146 @@
+/* Quill Cloud — additions on top of quill-tokens.css.
+   Every new piece of UI for sync, versions and Claude lives here so the
+   implementation can copy it verbatim. */
+
+/* ---------- Status glyphs (16px) ---------- */
+.q-stat { display: inline-flex; align-items: center; justify-content: center; width: 20px; height: 20px; flex: none; color: var(--q-text-secondary); }
+.q-stat.is-new { color: var(--q-accent-text); }
+.q-stat.is-synced { color: var(--q-text-tertiary); }
+.q-stat.is-pending { color: var(--q-text-secondary); }
+.q-stat.is-local { color: var(--q-text-tertiary); }
+
+/* ---------- Sync pill (status bar / list headers) ---------- */
+.q-sync { display: inline-flex; align-items: center; gap: 6px; height: 20px; padding: 0 8px 0 6px; border-radius: 10px; font: var(--q-type-caption); color: var(--q-text-secondary); white-space: nowrap; }
+.q-sync .q-ico { width: 13px; height: 13px; }
+.q-sync.is-attention { background: var(--q-accent-tint); color: var(--q-accent-text); font: var(--q-type-caption-strong); }
+.q-sync.is-offline { color: var(--q-text-tertiary); }
+.q-sync.is-button { cursor: default; }
+.q-sync.is-button:hover { background: var(--q-fill-hover); }
+.q-sync.is-attention.is-button:hover { background: var(--q-accent-tint); filter: brightness(0.97); }
+
+/* ---------- Tags ---------- */
+.q-tag { display: inline-flex; align-items: center; gap: 4px; height: 18px; padding: 0 7px 0 5px; border-radius: 9px; font: var(--q-type-caption-strong); white-space: nowrap; flex: none; }
+.q-tag .q-ico { width: 11px; height: 11px; stroke-width: 1.6; }
+.q-tag.claude { background: var(--q-accent-tint); color: var(--q-accent-text); }
+.q-tag.neutral { background: var(--q-fill-subtle); color: var(--q-text-secondary); }
+
+/* ---------- File list extras ---------- */
+.q-filelist td .q-row-actions { display: none; gap: 6px; justify-content: flex-end; }
+.q-filelist tr.is-hover td .q-row-actions { display: flex; }
+.q-filelist tr.is-hover td .q-row-when { display: none; }
+.q-filelist td.act { text-align: right; width: 180px; }
+.q-filelist .q-btn.sm { height: 24px; padding: 0 10px; font: var(--q-type-callout); }
+.q-section-head { display: flex; align-items: center; gap: 12px; min-height: 28px; }
+.q-section-head h2 { margin: 0; font: var(--q-type-title); }
+.q-section-sub { font: var(--q-type-callout); color: var(--q-text-secondary); }
+
+/* ---------- Account block (bottom of rail) ---------- */
+.q-account { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: var(--q-radius-md); color: var(--q-text-primary); text-decoration: none; }
+.q-account:hover { background: var(--q-fill-hover); }
+.q-avatar { width: 28px; height: 28px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--q-accent); color: var(--q-text-on-accent); font: 600 11px/1 var(--q-font-ui); flex: none; letter-spacing: 0.02em; }
+.q-avatar.lg { width: 44px; height: 44px; font-size: 15px; }
+.q-account-name { font: var(--q-type-headline); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.q-account-sub { font: var(--q-type-caption); color: var(--q-text-secondary); white-space: nowrap; }
+
+/* ---------- Setup card (centered, Tesla-style one decision per screen) ---------- */
+.q-setup { width: 560px; border-radius: 16px; background: var(--q-bg-elevated); box-shadow: var(--q-shadow-sheet); color: var(--q-text-primary); display: flex; flex-direction: column; overflow: hidden; }
+.q-setup-body { padding: 44px 48px 36px; display: flex; flex-direction: column; align-items: center; gap: 12px; text-align: center; }
+.q-setup-hero { width: 72px; height: 72px; border-radius: 22px; display: inline-flex; align-items: center; justify-content: center; background: var(--q-accent-tint); color: var(--q-accent-text); margin-bottom: 8px; }
+.q-setup-hero .q-ico { width: 36px; height: 36px; stroke-width: 1.3; }
+.q-setup h1 { margin: 0; font: 700 24px/30px var(--q-font-ui); letter-spacing: -0.01em; }
+.q-setup p.lead { margin: 0; font: 400 14px/21px var(--q-font-ui); color: var(--q-text-secondary); max-width: 420px; }
+.q-setup-points { display: flex; flex-direction: column; gap: 10px; margin: 16px 0 4px; width: 100%; text-align: left; }
+.q-point { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: var(--q-radius-lg); background: var(--q-fill-subtle); }
+.q-point .q-ico { width: 18px; height: 18px; margin-top: 1px; color: var(--q-accent-text); }
+.q-point b { display: block; font: var(--q-type-headline); margin-bottom: 2px; }
+.q-point span { font: var(--q-type-callout); color: var(--q-text-secondary); }
+.q-setup-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 24px; border-top: 1px solid var(--q-separator); background: var(--q-bg-chrome); }
+.q-dots { display: flex; gap: 6px; align-items: center; }
+.q-dots span { width: 6px; height: 6px; border-radius: 50%; background: var(--q-fill-pressed); }
+.q-dots span.is-on { background: var(--q-accent); width: 18px; border-radius: 3px; }
+.q-btn.lg { height: 40px; padding: 0 20px; font: 600 14px/1 var(--q-font-ui); border-radius: var(--q-radius-lg); }
+.q-btn.lg .q-ico { width: 18px; height: 18px; }
+.q-btn.wide { width: 100%; justify-content: center; }
+.q-btn.plain { background: transparent; border-color: transparent; box-shadow: none; color: var(--q-text-secondary); }
+.q-btn.plain:hover { background: var(--q-fill-hover); }
+.q-google { width: 18px; height: 18px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; background: var(--q-bg-window); box-shadow: 0 0 0 0.5px var(--q-border-control); font: 700 11px/1 var(--q-font-ui); color: var(--q-text-primary); }
+
+/* ---------- Rows inside sheets and settings ---------- */
+.q-setrow { display: flex; align-items: center; gap: 14px; min-height: 52px; padding: 10px 16px; }
+.q-setrow + .q-setrow { border-top: 1px solid var(--q-separator); }
+.q-setrow .q-setrow-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.q-setrow .lbl { font: var(--q-type-body); font-weight: 500; }
+.q-setrow .sub { font: var(--q-type-callout); color: var(--q-text-secondary); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.q-setgroup { border-radius: var(--q-radius-lg); background: var(--q-bg-window); box-shadow: inset 0 0 0 0.5px var(--q-separator); overflow: hidden; }
+.q-dark .q-setgroup { background: var(--q-bg-field); }
+.q-setgroup-title { font: var(--q-type-caption-strong); color: var(--q-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; padding: 0 4px 8px; }
+.q-pathbox { display: inline-flex; align-items: center; gap: 8px; height: 28px; padding: 0 10px; border-radius: var(--q-radius-sm); background: var(--q-fill-subtle); box-shadow: inset 0 0 0 0.5px var(--q-separator); font: var(--q-type-callout); color: var(--q-text-primary); font-family: var(--q-font-mono); font-size: 12px; white-space: nowrap; }
+.q-pathbox .q-ico { width: 14px; height: 14px; color: var(--q-text-secondary); }
+
+/* Toggle (macOS style) */
+.q-toggle { position: relative; width: 38px; height: 22px; border-radius: 11px; background: var(--q-fill-pressed); border: 0; padding: 0; margin: 0; flex: none; appearance: none; }
+.q-toggle::after { content: ""; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; border-radius: 50%; background: #FFFFFF; box-shadow: 0 0 0 0.5px rgba(0,0,0,0.12), 0 1px 3px rgba(0,0,0,0.25); transition: left var(--q-dur-fast) var(--q-ease); }
+.q-toggle[aria-checked="true"] { background: var(--q-accent); }
+.q-toggle[aria-checked="true"]::after { left: 18px; }
+
+/* Storage meter */
+.q-meter { height: 6px; border-radius: 3px; background: var(--q-fill-pressed); overflow: hidden; width: 100%; }
+.q-meter span { display: block; height: 100%; border-radius: 3px; background: var(--q-accent); }
+
+/* Status dot */
+.q-dot { width: 8px; height: 8px; border-radius: 50%; background: #2DAA5A; flex: none; box-shadow: 0 0 0 3px rgba(45,170,90,0.18); }
+.q-dot.off { background: var(--q-text-tertiary); box-shadow: none; }
+
+/* ---------- Version history popover ---------- */
+.q-versions { width: 360px; display: flex; flex-direction: column; border-radius: var(--q-radius-lg); background: var(--q-bg-elevated); box-shadow: var(--q-shadow-popover); color: var(--q-text-primary); overflow: hidden; }
+.q-versions-head { display: flex; align-items: center; justify-content: space-between; padding: 12px 14px 8px; }
+.q-versions-head h3 { margin: 0; font: var(--q-type-headline); }
+.q-version { display: flex; gap: 12px; align-items: flex-start; padding: 10px 14px; border-top: 1px solid var(--q-separator); }
+.q-version.is-current { background: var(--q-accent-tint); }
+.q-version .who { width: 22px; height: 22px; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font: 600 9px/1 var(--q-font-ui); background: var(--q-fill-on); color: var(--q-text-primary); flex: none; margin-top: 1px; }
+.q-version .who.claude { background: var(--q-accent); color: var(--q-text-on-accent); }
+.q-version .v-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.q-version .v-title { font: var(--q-type-body); font-weight: 500; display: flex; align-items: center; gap: 8px; }
+.q-version .v-sub { font: var(--q-type-callout); color: var(--q-text-secondary); }
+.q-version .v-note { font: var(--q-type-callout); color: var(--q-text-primary); margin-top: 2px; }
+.q-versions-foot { padding: 10px 14px; border-top: 1px solid var(--q-separator); font: var(--q-type-caption); color: var(--q-text-secondary); display: flex; justify-content: space-between; align-items: center; }
+
+/* ---------- Sheet layout (reused from Export/Unsaved) ---------- */
+.q-sheet-body { display: flex; flex-direction: column; gap: 16px; padding: 28px 28px 20px; }
+.q-sheet-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 0 28px 24px; }
+.q-sheet-title { margin: 0; font: var(--q-type-title); }
+.q-sheet-text { margin: 0; font: var(--q-type-body); color: var(--q-text-secondary); line-height: 18px; }
+.q-sheet-ico { width: 56px; height: 56px; border-radius: 16px; display: inline-flex; align-items: center; justify-content: center; background: var(--q-accent-tint); color: var(--q-accent-text); flex: none; }
+.q-sheet-ico .q-ico { width: 28px; height: 28px; stroke-width: 1.3; }
+
+/* ---------- Minimal editor chrome used by the editor boards ---------- */
+.q-mini-ribbon { height: 96px; flex: none; display: flex; gap: 0; padding: 6px 6px 0; background: var(--q-bg-chrome); border-bottom: 1px solid var(--q-separator); }
+.q-mini-group { display: flex; flex-direction: column; justify-content: space-between; padding: 0 12px 4px; border-right: 1px solid var(--q-separator); }
+.q-mini-group:last-child { border-right: 0; }
+.q-mini-group .row { display: flex; gap: 4px; align-items: center; }
+.q-mini-group .lbl { font: var(--q-type-caption); color: var(--q-text-secondary); text-align: center; height: 18px; line-height: 18px; }
+.q-ghost { height: 26px; border-radius: var(--q-radius-sm); background: var(--q-fill-subtle); box-shadow: inset 0 0 0 0.5px var(--q-separator); }
+.q-ghost.sq { width: 26px; }
+.q-ghost.w120 { width: 120px; }
+.q-ghost.w64 { width: 64px; }
+.q-ghost.w40 { width: 40px; }
+.q-ghost.w90 { width: 90px; }
+
+/* ---------- App-only additions (not on the canvas) ---------- */
+.q-filelist tbody tr:hover td .q-row-actions { display: flex; }
+.q-filelist tbody tr:hover td .q-row-when { display: none; }
+.q-filelist td.act { width: 200px; }
+.q-filelist .q-row-actions .q-btn, .q-filelist .q-row-actions .q-tbtn { -webkit-app-region: no-drag; }
+.q-sync.is-button { appearance: none; border: 0; background: transparent; font: var(--q-type-caption); color: var(--q-text-secondary); cursor: default; }
+.q-sync.is-button.is-attention { background: var(--q-accent-tint); color: var(--q-accent-text); font: var(--q-type-caption-strong); }
+.q-setup-wrap { position: absolute; inset: 0; z-index: 72; display: flex; align-items: center; justify-content: center; }
+.q-setup { animation: q-setup-in var(--q-dur-sheet) var(--q-ease); }
+@keyframes q-setup-in { from { transform: translateY(12px) scale(0.98); opacity: 0; } to { transform: none; opacity: 1; } }
+.q-setup input.q-field { width: 100%; height: 36px; font: var(--q-type-body); }
+.q-versions.q-float { position: absolute; left: 50%; transform: translateX(-50%); bottom: calc(var(--q-statusbar-h) + 8px); z-index: 65; max-height: 60vh; overflow-y: auto; }
+.q-start-rail .q-rail-cloud { margin-top: auto; }
+.q-account { cursor: default; }
+.q-stat .q-ico { width: 16px; height: 16px; }
+.q-setrow .q-btn { flex: none; }
+.q-sheet.is-settings { padding: 0; display: flex; flex-direction: column; max-height: calc(100% - var(--q-titlebar-h) - 24px); }
+.q-sheet.is-settings .q-sheet-body { overflow-y: auto; }

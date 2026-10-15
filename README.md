@@ -1,6 +1,8 @@
 # Quill — a free Word alternative for macOS
 
-Quill is a free, open-source word processor for the Mac. It opens and saves real `.docx` files that work in Microsoft Word, Pages and Google Docs, exports PDF, and runs entirely on your machine: no account, no cloud, no telemetry, no AI.
+Quill is a free, open-source word processor for the Mac. It opens and saves real `.docx` files that work in Microsoft Word, Pages and Google Docs, exports PDF, and runs entirely on your machine: no account, no telemetry, no AI.
+
+Optionally, **Quill Cloud** keeps copies of the documents you choose on a server *you* run, so they open on any Mac and **Claude** can read and edit them through MCP, even while your Mac is off. It is off until you turn it on, and the server is one file on a spare machine. See [Cloud and Claude](#cloud-and-claude-optional-self-hosted).
 
 **[Download the latest release](https://github.com/harshramani00/quill/releases/latest)** (Apple Silicon `.dmg`)
 
@@ -56,9 +58,27 @@ xattr -d com.apple.quarantine /Applications/Quill.app
 
 Builds you make yourself with `npm run dist` are signed with whatever Apple Development identity is in your keychain, or left unsigned if there is none.
 
+## Cloud and Claude (optional, self-hosted)
+
+With Cloud off, Quill is exactly the local app described above. With it on:
+
+- The start screen gains **Cloud** (every document in your library, with a status glyph: not on this Mac, up to date, newer version on cloud, waiting to upload) and **On this Mac** (local files, with *Upload to Cloud*). Nothing is downloaded until you open or download it.
+- Every save becomes a new version on the server (the last 30 are kept), so nothing you or Claude write is ever overwritten. The status bar shows *Saved to cloud*, and lights up when the cloud holds a newer version.
+- The only question Quill ever asks is on open, when the cloud is ahead: **Fetch Newer Version** or **Keep Mine**. Keep Mine opens your copy, and your next save becomes the newest version.
+- **Claude** connects to the same server as an MCP connector (phone, web or desktop). It can list, read, create and edit your cloud documents, each edit a new version with a note. You approve exactly what it may do and can disconnect it from Cloud settings at any time.
+- Accounts are sealed off from one another. Friends sign in with Google and get their own library on your server; nobody can see anyone else's documents.
+
+Turn it on from the start screen (**Turn on Cloud…**): enter your server address, continue with Google, confirm the folder, and copy the connector address for Claude. Settings live under **File › Cloud Settings…** (⌘,).
+
+The server (`server/`) is a single Node file that runs on a spare Windows machine, reachable from anywhere through Tailscale Funnel at no cost. Setup, backups and the Google sign-in steps are in [server/deploy/README.md](server/deploy/README.md); the protocol and isolation rules are in [docs/CLOUD.md](docs/CLOUD.md).
+
+Try the whole thing locally without Google: `QUILL_DEV_LOGIN=1 npm run server:dev`, then use `http://127.0.0.1:8787` as the server address in Quill. Server tests: `npm run server:test`.
+
+The app bundle gains no new dependencies for this; all network code is in the main process using Node's `fetch`, `http`, `crypto` and Electron's `safeStorage`. The server's few dependencies (`hono`, `@modelcontextprotocol/sdk`, `zod`, `jose`, `happy-dom`) are justified in [docs/CLOUD.md](docs/CLOUD.md) and stay out of the dmg.
+
 ## Releasing
 
-Every push to `main` runs tests and typechecks. When `package.json`'s version has no matching `v<version>` tag yet, the Release workflow also builds the dmg on a macOS runner and publishes a GitHub release with it. So to ship: bump the version, merge to `main`, and the release appears a few minutes later. Merges that keep the same version only run the checks.
+Every push to `main` runs tests and typechecks (app and server). When `package.json`'s version has no matching `v<version>` tag yet, the Release workflow also builds the dmg on a macOS runner, bundles the server into `quill-cloud-server.mjs`, and publishes a GitHub release with both. So to ship: bump the version, merge to `main`, and the release appears a few minutes later. Merges that keep the same version only run the checks.
 
 Add these repository secrets to get signed and notarised builds instead of ad-hoc signed ones: `CSC_LINK` and `CSC_KEY_PASSWORD` (Developer ID certificate as a base64 `.p12`), `APPLE_ID`, `APPLE_APP_SPECIFIC_PASSWORD`, `APPLE_TEAM_ID`.
 
@@ -68,6 +88,8 @@ Add these repository secrets to get signed and notarised builds instead of ad-ho
 |---|---|
 | `src/main/` | Electron main process: window, native menu, file dialogs, IPC handlers, recent files, PDF export |
 | `src/main/docx/` | `build.ts` (TipTap JSON → docx), `import.ts` + `importPrepass.ts` + `importStyleMap.ts` (docx → TipTap JSON via mammoth), `styles.ts`, `marks.ts` |
+| `src/main/cloud/` | Sync engine: sign-in through the browser, encrypted tokens, the local index, uploads after save, downloads, the change stream |
+| `server/` | Quill Cloud: SQLite + document versions, desktop API, OAuth 2.1 + Google sign-in, MCP endpoint with the editing tools; `deploy/` for Windows |
 | `src/preload/` | `contextBridge` exposing the typed `window.quill` API; context isolation on, node integration off |
 | `src/renderer/` | React UI: start screen, editor canvas with visual pagination, toolbars, popovers, sheets, sidebar, status bar |
 | `src/shared/` | IPC types and channel names, page geometry, and the document schema (TipTap extensions shared by the editor and the importer) |
@@ -94,4 +116,5 @@ On import, mammoth converts the structure. Because mammoth's document model has 
 - **Fonts.** The bundled document font is Source Serif 4; other choices in the font picker rely on fonts installed on the Mac.
 - **Ribbon controls** for non-MVP features (Review, References, most of Insert and Layout, Find/Replace, formatting marks, table styles) are shown as in the design but disabled.
 - **PDF export** uses Chromium's print engine with the chosen paper size and margins; hyperlinks are preserved but there are no PDF bookmarks.
+- **Cloud** has no sharing between accounts and no merging: when two copies diverge, the later save wins and the other stays in version history. Claude's Markdown covers headings, paragraphs, lists, tables and basic inline formatting; images and page breaks are kept but not authored.
 - The app is not notarised; signing uses whatever Apple Development identity is available locally.

@@ -2,6 +2,17 @@
 import type { JSX, SVGProps } from 'react'
 
 export type IconName =
+  | "cloud"
+  | "cloud-check"
+  | "cloud-down"
+  | "cloud-up"
+  | "cloud-off"
+  | "laptop"
+  | "sparkle"
+  | "gear"
+  | "lock"
+  | "versions"
+  | "more"
   | "add-column-left"
   | "add-column-right"
   | "add-row-above"
@@ -276,6 +287,18 @@ const PATHS: Record<IconName, JSX.Element> = {
   "web-layout": <><rect x="1.5" y="2.5" width="13" height="11" rx="1.5" /><path d="M1.5 5.5h13" /></>,
   "zoom-in": <><path d="M3.5 8h9M8 3.5v9" /></>,
   "zoom-out": <><path d="M3.5 8h9" /></>,
+  /* Cloud additions (from the Quill Cloud canvas) */
+  "cloud": <><path d="M4.6 12.5h6.9a2.9 2.9 0 0 0 .5-5.76A4 4 0 0 0 4.3 7.6 2.5 2.5 0 0 0 4.6 12.5z" /></>,
+  "cloud-check": <><path d="M4.6 12.5h6.9a2.9 2.9 0 0 0 .5-5.76A4 4 0 0 0 4.3 7.6 2.5 2.5 0 0 0 4.6 12.5z" /><path d="M6.2 9.6l1.3 1.2 2.6-2.8" /></>,
+  "cloud-down": <><path d="M4.6 12.5h6.9a2.9 2.9 0 0 0 .5-5.76A4 4 0 0 0 4.3 7.6 2.5 2.5 0 0 0 4.6 12.5z" /><path d="M8 7.4v3.8M6.6 9.9 8 11.2l1.4-1.3" /></>,
+  "cloud-up": <><path d="M4.6 12.5h6.9a2.9 2.9 0 0 0 .5-5.76A4 4 0 0 0 4.3 7.6 2.5 2.5 0 0 0 4.6 12.5z" /><path d="M8 11.2V7.4M6.6 8.7 8 7.4l1.4 1.3" /></>,
+  "cloud-off": <><path d="M4.6 12.5h6.9a2.9 2.9 0 0 0 .5-5.76A4 4 0 0 0 4.3 7.6 2.5 2.5 0 0 0 4.6 12.5z" /><path d="M3 13 13 3" /></>,
+  "laptop": <><path d="M3 4.5h10v6H3z" /><path d="M1.5 12.5h13" /></>,
+  "sparkle": <><path d="M8 2.5l1.3 3.2 3.2 1.3-3.2 1.3L8 11.5 6.7 8.3 3.5 7l3.2-1.3z" /></>,
+  "gear": <><circle cx="8" cy="8" r="2.2" /><path d="M8 1.8v1.9M8 12.3v1.9M1.8 8h1.9M12.3 8h1.9M3.6 3.6l1.3 1.3M11.1 11.1l1.3 1.3M3.6 12.4l1.3-1.3M11.1 4.9l1.3-1.3" /></>,
+  "lock": <><rect x="3" y="7" width="10" height="6.5" rx="1.2" /><path d="M5.5 7V5a2.5 2.5 0 0 1 5 0v2" /></>,
+  "versions": <><path d="M3 12.5V7.5M8 12.5v-9M13 12.5V5" /><path d="M1.5 12.5h13" /></>,
+  "more": <><circle className="f" cx="3.5" cy="8" r="1.1" /><circle className="f" cx="8" cy="8" r="1.1" /><circle className="f" cx="12.5" cy="8" r="1.1" /></>,
 }
 
 export interface IconProps extends Omit<SVGProps<SVGSVGElement>, 'name'> {

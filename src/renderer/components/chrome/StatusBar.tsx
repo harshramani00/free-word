@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { ZOOM_MAX, ZOOM_MIN, ZOOM_STEP, clampZoom, getState } from '../../state/documentStore'
+import { SyncPill } from '../cloud/SyncPill'
 import { TBtn, VSep } from '../controls'
 
 export function StatusBar({ page, pages, words, characters, zoom, notice, onZoom }: { page: number; pages: number; words: number; characters: number; zoom: number; notice: string | null; onZoom: (z: number) => void }): ReactNode {
@@ -11,8 +12,9 @@ export function StatusBar({ page, pages, words, characters, zoom, notice, onZoom
       </span>
       <span>{words.toLocaleString()} words</span>
       <span>{characters.toLocaleString()} characters</span>
-      <span>English (US)</span>
       {notice ? <span className="q-notice">{notice}</span> : null}
+      <span className="q-fill" />
+      <SyncPill />
       <span className="q-fill" />
       <TBtn label="Focus" text="Focus" small disabled style={{ padding: '0 6px', font: 'var(--q-type-caption)' }} />
       <div style={{ display: 'flex', gap: 2 }}>

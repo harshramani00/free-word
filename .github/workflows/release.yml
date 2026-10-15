@@ -23,11 +23,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
       - run: npm ci
       - run: npm run typecheck
       - run: npm test
+      - name: Server (Quill Cloud)
+        run: |
+          npm run typecheck -w server
+          npm test -w server
 
   release:
     name: Build dmg and publish
@@ -53,7 +57,7 @@ jobs:
       - uses: actions/setup-node@v4
         if: steps.version.outputs.release == 'true'
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
 
       - run: npm ci
@@ -107,6 +111,12 @@ jobs:
         if: steps.version.outputs.release == 'true'
         run: npx electron-builder --mac dmg --arm64 --prepackaged release/mac-arm64/Quill.app --publish never
 
+      - name: Build the Quill Cloud server bundle
+        if: steps.version.outputs.release == 'true'
+        run: |
+          npm run build -w server
+          cp server/dist/server.mjs release/quill-cloud-server.mjs
+
       - name: Publish the release
         if: steps.version.outputs.release == 'true'
         env:
@@ -114,13 +124,17 @@ jobs:
           VERSION: ${{ steps.version.outputs.version }}
         run: |
           DMG="release/Quill-$VERSION-arm64.dmg"
+          SERVER="release/quill-cloud-server.mjs"
           SHA=$(shasum -a 256 "$DMG" | cut -d' ' -f1)
+          SHA_SERVER=$(shasum -a 256 "$SERVER" | cut -d' ' -f1)
           {
             cat .github/release-body.md
             echo
             echo "SHA-256 \`Quill-$VERSION-arm64.dmg\`: \`$SHA\`"
+            echo
+            echo "SHA-256 \`quill-cloud-server.mjs\`: \`$SHA_SERVER\`"
           } > /tmp/notes.md
-          gh release create "v$VERSION" "$DMG" \
+          gh release create "v$VERSION" "$DMG" "$SERVER" \
             --title "Quill $VERSION" \
             --notes-file /tmp/notes.md \
             --generate-notes \

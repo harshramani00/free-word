@@ -1,3 +1,4 @@
+import type { CloudAccount, CloudRow, CloudState, NewerOnCloud, VersionInfo } from './cloud'
 import type { PageSetup } from './pageSetup'
 
 export type { PageSetup, PaperSize, MarginPreset } from './pageSetup'
@@ -33,6 +34,10 @@ export interface OpenedDocument {
   html: string
   pageSetup: PageSetup
   warnings: string[]
+  /** Set when the file is a synced cloud document. */
+  cloudDocId?: string | null
+  /** Set when the cloud holds a newer version than this local copy; the renderer asks before loading. */
+  cloudNewer?: NewerOnCloud | null
 }
 
 export interface SaveRequest {
@@ -107,6 +112,8 @@ export type MenuAction =
   | 'view:toggleRuler'
   | 'view:toolbarSimple'
   | 'view:toolbarFull'
+  | 'cloud:settings'
+  | 'cloud:history'
 
 export interface QuillApi {
   platform: string
@@ -132,4 +139,24 @@ export interface QuillApi {
   recentRemove(path: string): Promise<RecentEntry[]>
   /* Window */
   setDocumentState(state: DocumentState): void
+  /* Cloud (all network work happens in the main process) */
+  cloudState(): Promise<CloudState>
+  onCloudState(cb: (state: CloudState) => void): () => void
+  cloudList(): Promise<CloudRow[]>
+  onCloudList(cb: (rows: CloudRow[]) => void): () => void
+  cloudRefresh(): Promise<void>
+  cloudSignIn(serverUrl: string): Promise<CloudAccount>
+  cloudSignOut(): Promise<void>
+  cloudSetEnabled(enabled: boolean): Promise<void>
+  /** Shows a folder picker; resolves to the chosen folder or null. */
+  cloudChooseFolder(): Promise<string | null>
+  /** Downloads the newest (or given) version into the Quill folder and opens it. */
+  cloudDownload(docId: string, version?: number): Promise<OpenedDocument>
+  cloudRemoveDownload(docId: string): Promise<void>
+  cloudStopSyncing(docId: string): Promise<void>
+  cloudUpload(path: string): Promise<CloudRow>
+  cloudVersions(docId: string): Promise<VersionInfo[]>
+  /** Makes an older version the newest on the cloud, downloads it and opens it. */
+  cloudRestore(docId: string, version: number): Promise<OpenedDocument>
+  cloudDisconnectApp(id: string): Promise<void>
 }

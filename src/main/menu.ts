@@ -44,7 +44,10 @@ export function buildAppMenu(): Menu {
       item('Save As…', 'file:saveAs', 'Shift+CmdOrCtrl+S'),
       { type: 'separator' },
       item('Export…', 'file:export', 'Shift+CmdOrCtrl+E'),
-      item('Export as PDF…', 'file:exportPdf', 'CmdOrCtrl+P')
+      item('Export as PDF…', 'file:exportPdf', 'CmdOrCtrl+P'),
+      { type: 'separator' },
+      item('Version History…', 'cloud:history'),
+      item('Cloud Settings…', 'cloud:settings', 'CmdOrCtrl+,')
     ]
   }
 

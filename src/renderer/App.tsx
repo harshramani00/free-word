@@ -9,7 +9,11 @@ import { Sidebar } from './components/chrome/Sidebar'
 import { StatusBar } from './components/chrome/StatusBar'
 import { Tabs } from './components/chrome/Tabs'
 import { EditorTitleBar, StartTitleBar } from './components/chrome/TitleBar'
+import { VersionHistory } from './components/cloud/VersionHistory'
+import { CloudSettingsSheet } from './components/sheets/CloudSettingsSheet'
+import { CloudSetupSheet } from './components/sheets/CloudSetupSheet'
 import { ExportSheet } from './components/sheets/ExportSheet'
+import { NewerVersionSheet } from './components/sheets/NewerVersionSheet'
 import { UnsavedSheet } from './components/sheets/UnsavedSheet'
 import { StartScreen } from './components/start/StartScreen'
 import { HomeRibbon } from './components/toolbar/HomeRibbon'
@@ -21,7 +25,8 @@ import { findNext, insertImageFromDisk, outlineOf, scrollToPos, setAlignment, se
 import { editorExtensions } from './editor/extensions'
 import { pageAtPos, relayout } from './editor/extensions/pagination'
 import { useToolbarState } from './editor/useToolbarState'
-import { cancelSheet, editorRef, exportDocument, exportPdfQuick, markSaved, newDocument, openDocument, receiveOpenedDocument, requestClose, runIntent, saveDocument, syncDirty } from './state/actions'
+import { cancelSheet, editorRef, exportDocument, exportPdfQuick, fetchNewer, keepMine, markSaved, newDocument, openCloudRow, openDocument, receiveOpenedDocument, requestClose, restoreVersion, runIntent, saveDocument, syncDirty } from './state/actions'
+import { startCloudStore, useCloud } from './state/cloudStore'
 import { EMPTY_DOC, clampZoom, getState, setState, useDocState } from './state/documentStore'
 import { BLANK } from './components/start/templates'
 
@@ -76,6 +81,12 @@ function handleMenu(action: MenuAction, openExport: () => void, focusSearch: () 
       return
     case 'view:toolbarFull':
       setState({ toolbarMode: 'full' })
+      return
+    case 'cloud:settings':
+      setState({ sheet: { kind: 'cloudSettings' } })
+      return
+    case 'cloud:history':
+      if (s.screen === 'editor') setState({ historyOpen: true })
       return
     default:
       break
@@ -171,8 +182,32 @@ function handleMenu(action: MenuAction, openExport: () => void, focusSearch: () 
   }
 }
 
+/** Sheets that can appear on either screen: the newer-version question, Cloud settings, Cloud setup. */
+function CloudSheets(): ReactNode {
+  const sheet = useDocState((s) => s.sheet)
+  if (sheet?.kind === 'newer') {
+    const doc = sheet.doc
+    return (
+      <NewerVersionSheet
+        doc={doc}
+        onKeepMine={() => keepMine(doc)}
+        onFetch={() => void fetchNewer(doc.cloudNewer!.docId)}
+        onHistory={() => {
+          keepMine(doc)
+          setState({ historyOpen: true })
+        }}
+      />
+    )
+  }
+  if (sheet?.kind === 'cloudSettings') return <CloudSettingsSheet onDone={() => setState({ sheet: null })} onSetUp={() => setState({ sheet: { kind: 'cloudSetup' } })} />
+  if (sheet?.kind === 'cloudSetup') return <CloudSetupSheet onDone={() => setState({ sheet: null })} onCancel={() => setState({ sheet: null })} />
+  return null
+}
+
 function EditorHost(): ReactNode {
-  const { name, dirty, pageSetup, zoom, toolbarMode, activeTab, navVisible, rulerVisible, sheet, pendingContent, loadToken, pageCount, notice } = useDocState((s) => ({
+  const { name, dirty, pageSetup, zoom, toolbarMode, activeTab, navVisible, rulerVisible, sheet, pendingContent, loadToken, pageCount, notice, cloudDocId, historyOpen } = useDocState((s) => ({
+    cloudDocId: s.cloudDocId,
+    historyOpen: s.historyOpen,
     name: s.name,
     dirty: s.dirty,
     pageSetup: s.pageSetup,
@@ -192,6 +227,7 @@ function EditorHost(): ReactNode {
   const canvasRef = useRef<HTMLDivElement | null>(null)
   const [search, setSearch] = useState('')
   const searchLabelRef = useRef<HTMLLabelElement | null>(null)
+  const cloudRow = useCloud((u) => (cloudDocId ? u.rows.find((r) => r.id === cloudDocId) ?? null : null))
 
   const editor = useEditor(
     {
@@ -341,6 +377,21 @@ function EditorHost(): ReactNode {
         </div>
       </div>
       <StatusBar page={Math.min(live.currentPage, pageCount)} pages={pageCount} words={live.words} characters={live.characters} zoom={zoom} notice={notice} onZoom={(z) => setState({ zoom: z })} />
+      {historyOpen ? (
+        <VersionHistory
+          row={cloudRow}
+          docName={name}
+          onClose={() => setState({ historyOpen: false })}
+          onFetch={(n) => {
+            setState({ historyOpen: false })
+            if (cloudDocId) void fetchNewer(cloudDocId, n)
+          }}
+          onRestore={(n) => {
+            if (cloudDocId) void restoreVersion(cloudDocId, n)
+          }}
+        />
+      ) : null}
+      <CloudSheets />
       {sheet?.kind === 'export' ? <ExportSheet name={name} pageSetup={pageSetup} onCancel={() => setState({ sheet: null })} onExport={(c) => void exportDocument(c)} /> : null}
       {sheet?.kind === 'unsaved' ? (
         <UnsavedSheet
@@ -377,13 +428,25 @@ function StartHost(): ReactNode {
   return (
     <div className="q-app">
       <StartTitleBar />
-      <StartScreen onNew={(c) => newDocument(c)} onOpen={() => void openDocument()} onOpenPath={(p) => void openDocument(p)} />
+      <StartScreen
+        onNew={(c) => newDocument(c)}
+        onOpen={() => void openDocument()}
+        onOpenPath={(p) => void openDocument(p)}
+        onOpenRow={(row) => void openCloudRow(row)}
+        onTurnOnCloud={() => setState({ sheet: { kind: 'cloudSetup' } })}
+        onSettings={() => setState({ sheet: { kind: 'cloudSettings' } })}
+      />
+      <CloudSheets />
     </div>
   )
 }
 
 export function App(): ReactNode {
   useTheme()
+  useEffect(() => {
+    startCloudStore()
+    if (import.meta.env.DEV) (window as unknown as { __quillOpen?: (p: string) => void }).__quillOpen = (p) => void openDocument(p)
+  }, [])
   const screen = useDocState((s) => s.screen)
   useEffect(() => window.quill.onOpenDocument((doc) => receiveOpenedDocument(doc)), [])
   useEffect(() => window.quill.onConfirmClose((reason) => requestClose(reason)), [])

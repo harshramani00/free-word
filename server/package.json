@@ -1,6 +1,6 @@
 {
   "name": "quill-cloud",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Quill Cloud — self-hosted sync server and MCP endpoint for Quill documents.",
   "private": true,
   "type": "module",

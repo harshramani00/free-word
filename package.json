@@ -7,6 +7,9 @@
   "main": "./out/main/index.js",
   "author": "Harsh Ramani",
   "license": "MIT",
+  "workspaces": [
+    "server"
+  ],
   "scripts": {
     "dev": "electron-vite dev",
     "build": "electron-vite build",
@@ -14,7 +17,11 @@
     "typecheck": "tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json",
     "test": "vitest run",
     "test:watch": "vitest",
-    "dist": "npm run build && electron-builder --mac --arm64"
+    "dist": "npm run build && electron-builder --mac --arm64",
+    "server:dev": "npm run dev -w server",
+    "server:build": "npm run build -w server",
+    "server:test": "npm test -w server",
+    "server:typecheck": "npm run typecheck -w server"
   },
   "dependencies": {
     "@fontsource/source-serif-4": "^5.3.1",

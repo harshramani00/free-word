@@ -1,0 +1,48 @@
+{
+  "name": "quill-cloud",
+  "version": "0.1.0",
+  "description": "Quill Cloud — self-hosted sync server and MCP endpoint for Quill documents.",
+  "private": true,
+  "type": "module",
+  "engines": {
+    "node": ">=22.13"
+  },
+  "scripts": {
+    "dev": "node --watch-path=src --watch-path=../src/main/docx --watch-path=../src/shared --env-file-if-exists=.env --import tsx src/index.ts serve",
+    "build": "node esbuild.config.mjs",
+    "start": "node --env-file-if-exists=.env dist/server.mjs serve",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.5",
+    "@modelcontextprotocol/sdk": "^1.32.1",
+    "@tiptap/core": "^3.31.4",
+    "@tiptap/extension-highlight": "^3.31.4",
+    "@tiptap/extension-image": "^3.31.4",
+    "@tiptap/extension-subscript": "^3.31.4",
+    "@tiptap/extension-superscript": "^3.31.4",
+    "@tiptap/extension-table": "^3.31.4",
+    "@tiptap/extension-text-align": "^3.31.4",
+    "@tiptap/extension-text-style": "^3.31.4",
+    "@tiptap/extensions": "^3.31.4",
+    "@tiptap/html": "^3.31.4",
+    "@tiptap/pm": "^3.31.4",
+    "@tiptap/starter-kit": "^3.31.4",
+    "@xmldom/xmldom": "^0.9.12",
+    "docx": "^9.10.0",
+    "happy-dom": "^20.14.6",
+    "hono": "^4.13.13",
+    "jose": "^6.2.12",
+    "jszip": "^3.10.2",
+    "mammoth": "^1.13.0",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.5",
+    "esbuild": "^0.25.12",
+    "tsx": "^4.21.0",
+    "typescript": "^7.0.2",
+    "vitest": "^4.1.11"
+  }
+}
